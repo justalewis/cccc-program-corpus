@@ -1,0 +1,18 @@
+title: CCCC Program Corpus (pilot, 2024–2027)
+description_html: |
+  <p>Sessions and listed participants from the CCCC convention programs, parsed from eShow session listings captured on 27 October 2026.</p>
+  <p><b>Read before counting.</b> These are people <i>listed in the program</i>, not registrants or attendees. 2027 is a pre-convention listing and will change. People are joined across years only on an exact name match; clusters marked <code>exact-name;review</code> need a person to check them. Institution matches come from ROR, a curated alias list, and IPEDS; about 1 in 9 listed people has no matched institution.</p>
+license: "Data: CC0 (facts from the program). Session descriptions are excluded."
+source: "NCTE / eShow program listings (private capture)"
+databases:
+  corpus:
+    tables:
+      session:
+        description: "One row per session; parent_id links 2024 combined-panel presentations to their session."
+        hidden_columns: [description]
+      appearance:
+        description: "One row per name listed in a session, with the name and affiliation exactly as printed."
+      person:
+        description: "First-pass clusters. method=exact-name;review means the cluster spans more than one institution."
+      institution:
+        description: "ROR records (ror:) or IPEDS-only records (ipeds:). two_year=1 when IPEDS ICLEVEL=2 or Carnegie 2021 Basic is 1-14."
