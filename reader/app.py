@@ -188,10 +188,11 @@ def session(sid):
     doc = q1("SELECT * FROM source_documents WHERE id = ?", s["source_document_id"])
     page = next((p["page"] for p in people if p["page"]), None)
     conv = q1("SELECT * FROM conventions WHERE year = ?", s["year"])
+    grp = q1("SELECT id, name, kind FROM groups WHERE id = ?", s["group_id"]) if s["group_id"] else None
     link = None
     if doc and doc["public_url"]:
         link = doc["public_url"] + (f"#page={int(page) + 1}" if page is not None and doc["kind"] == "pdf" else "")
-    return render_template("session.html", s=s, people=people, children=children, parent=parent, doc=doc, page=page, conv=conv,
+    return render_template("session.html", s=s, people=people, children=children, parent=parent, grp=grp, doc=doc, page=page, conv=conv,
                            link=link, today=date.today().strftime("%B %-d, %Y") if os.name != "nt" else date.today().strftime("%B %d, %Y"))
 
 # ---- people ------------------------------------------------------------------------------
@@ -323,6 +324,42 @@ def area(name):
         abort(404)
     by_year = q("SELECT year, count(*) n FROM sessions WHERE (area = ? OR area_group = ?) AND parent_id IS NULL GROUP BY year ORDER BY year", name, name)
     return render_template("area.html", name=name, rows=rows, by_year=by_year)
+
+# ---- special-interest groups, caucuses and standing groups -------------------------------
+
+@app.route("/groups")
+def groups():
+    kind = request.args.get("kind", "")
+    qs = request.args.get("q", "").strip()
+    every = request.args.get("all") == "1"
+    where, args = ["1=1"], []
+    if not every:
+        where.append("g.years >= 2")
+    if kind:
+        where.append("g.kind = ?"); args.append(kind)
+    if qs:
+        where.append("g.name LIKE ?"); args.append(f"%{qs}%")
+    rows = q(f"SELECT * FROM groups g WHERE {' AND '.join(where)} ORDER BY g.years DESC, g.sessions DESC, g.name LIMIT 500", *args)
+    present = {}
+    for r in q("SELECT group_id, year FROM sessions WHERE group_id IS NOT NULL GROUP BY group_id, year"):
+        present.setdefault(r["group_id"], set()).add(r["year"])
+    years = [r["year"] for r in q("SELECT year FROM census ORDER BY year")]
+    kinds = [r["kind"] for r in q("SELECT DISTINCT kind FROM groups ORDER BY kind")]
+    per_year = q("""SELECT year, count(DISTINCT group_id) AS n FROM sessions WHERE group_id IS NOT NULL GROUP BY year ORDER BY year""")
+    return render_template("groups.html", rows=rows, present=present, years=years, kinds=kinds, kind=kind, qs=qs, every=every,
+                           per_year=per_year, total=q1("SELECT count(*) n FROM groups")["n"])
+
+@app.route("/group/<gid>")
+def group(gid):
+    g = q1("SELECT * FROM groups WHERE id = ?", gid)
+    if not g:
+        abort(404)
+    sess = q("SELECT id, year, code, title, cancelled FROM sessions WHERE group_id = ? ORDER BY year, code", gid)
+    people = q("""SELECT ps.person_id, ps.display_name, count(DISTINCT s.year) AS yrs FROM appearances a JOIN sessions s ON s.id = a.session_id
+                  JOIN person_summary ps ON ps.person_id = a.person_id WHERE s.group_id = ? AND ps.eligible = 1
+                  GROUP BY ps.person_id ORDER BY yrs DESC, ps.display_name LIMIT 40""", gid)
+    n_all = q1("SELECT count(DISTINCT a.person_id) n FROM appearances a JOIN sessions s ON s.id = a.session_id WHERE s.group_id = ?", gid)["n"]
+    return render_template("group.html", g=g, sess=sess, people=people, n_all=n_all)
 
 # ---- term trends -------------------------------------------------------------------------
 

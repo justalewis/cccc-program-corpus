@@ -4,6 +4,7 @@
 <h1>{{ s.title or '(no title)' }}</h1>
 <p class="meta">{% if s.code %}Session {{ s.code }}{% endif %}{% if s.session_type %} · {{ s.session_type }}{% endif %}{% if s.dates %} · {{ s.dates }}{% endif %}{% if s.time_label %} · {{ s.time_label }}{% endif %}{% if s.room %} · {{ s.room }}{% endif %}{% if s.cancelled %} · <span class="badge warn">cancelled</span>{% endif %}</p>
 {% if s.area %}<p class="meta">Area: <a href="/area/{{ s.area|urlencode }}">{{ s.area }}</a>{% if s.area_group and s.area_group != s.area %} · family: {{ s.area_group }}{% endif %}</p>{% endif %}
+{% if grp %}<p class="meta">Group: <a href="/group/{{ grp.id }}">{{ grp.name }}</a> ({{ grp.kind }})</p>{% endif %}
 {% if s.topic_tags %}<p class="meta">Tags: {{ s.topic_tags }}</p>{% endif %}
 {% if s.tracks %}<p class="meta">eShow tracks: {{ s.tracks }}</p>{% endif %}
 {% if people %}<div class="tbl"><table><thead><tr><th>Role</th><th>Name as printed</th><th>Affiliation as printed</th><th>Paper</th></tr></thead><tbody>

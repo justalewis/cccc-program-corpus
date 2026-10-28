@@ -61,6 +61,7 @@ src/enrich_ipeds.py      ROR -> Wikidata (P1771) -> IPEDS HD2023 (HD2008 for clo
 src/strip_places.py      "Old Dominion University, Norfolk, VA" -> the institution, when the dropped place is its own
 src/build_persons.py     exact normalized name across all years; sorts multi-institution names into moves and review; applies data/person_decisions*.csv and data/name_merges*.csv
 src/stats.py             per-year summary -> build/stats.json
+src/build_groups.py      the special-interest slots (FSIG, TSIG, WSIG) grouped by name -> sgroup, session.group_id (data/group_aliases.csv joins variants)
 src/review_crosswalk.py  the area headings and their draft families, as a decision page -> build/review/crosswalk.html
 src/parse_areas.py       the proposal area above each session in the PDF programs -> session.area, area_group (data/area_crosswalk.csv)
 src/review_people.py     the names still marked review, as a decision page -> build/review/people.html
