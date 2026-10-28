@@ -39,6 +39,19 @@ The eShow listings for 2024–2027, the born-digital PDF programs for 2004–202
 
 \* Share of listed people at US institutions with an IPEDS record whose institution is two-year (IPEDS level 2, or Carnegie Basic 1–14). These are people *listed in the program*, not registrants or attendees. 1999 counts only the ten letter sections whose PDFs survive (E, F, K and M are titles only). 2020 is the printed program of a convention that was cancelled. 2021 and 2022 were virtual. The 2027 listing will change before the convention. The source changes from PDF to eShow at 2024, so treat a step between 2023 and 2024 with care.
 
+Scored against the programs' own Index of Participants (`src/check_index.py`, six years where the program ends with one), the parser's (person, session) pairs reach:
+
+| Year | Precision | Recall | Main reason for misses |
+|---|---|---|---|
+| 2004 | 0.87 | 0.82 | special-interest sessions printed without codes; Research Network Forum |
+| 2005 | 0.93 | 0.92 | |
+| 2007 | 0.97 | 0.94 | |
+| 2008 | 0.94 | 0.92 | |
+| 2010 | 0.93 | 0.89 | Research Network Forum (113 pairs) |
+| 2011 | 0.94 | 0.89 | |
+
+The Research Network Forum (code RN.1) is one event with 90 to 110 presenters a year in these programs that the parser does not read. The index is not a perfect standard (it can omit or misprint a code), so these describe agreement.
+
 The eShow listings are complete against the PDF programs: 412 of 414 PDF session codes (2024), 777 of 779 (2025) and 662 of 682 (2026) appear in eShow. Scored against eShow for those three years, the PDF parser finds the listed names with precision 0.94–0.97 and recall 0.92–0.95.
 
 ## How it's built
