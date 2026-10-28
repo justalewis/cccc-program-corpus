@@ -118,8 +118,15 @@ def parse_listing(html, year):
         sessions[key] = s
     return sessions
 
+def by_stamp(paths):
+    """Oldest capture first, by the YYYYMMDD in the file name, so the newest one is applied last."""
+    return sorted(paths, key=lambda p: re.search(r"(\d{8})\.warc\.gz$", p).group(1))
+
 def listings(capture_dir):
-    for warc in sorted(glob.glob(os.path.join(capture_dir, "eshow-cccc-2024-2027-*.warc.gz"))):
+    # the first full capture, then the monthly 2027 re-captures (recapture_2027.py)
+    found = glob.glob(os.path.join(capture_dir, "eshow-cccc-2024-2027-*.warc.gz")) + \
+            glob.glob(os.path.join(capture_dir, "eshow-cccc-2027-*.warc.gz"))
+    for warc in by_stamp(found):
         with open(warc, "rb") as f:
             for rec in ArchiveIterator(f):
                 if rec.rec_type != "response":

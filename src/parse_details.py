@@ -19,8 +19,11 @@ def squash(s):
     return re.sub(r"[\s,]+", "", s or "").lower()
 
 def pairs(capture_dir):
-    """Yield (session_key, response_html) from the details WARC(s)."""
-    for warc in sorted(glob.glob(os.path.join(capture_dir, "eshow-cccc-details-*.warc.gz"))):
+    """Yield (session_key, response_html) from the details WARC(s), oldest capture first, so
+    the monthly 2027 re-captures (which hold detail views too) are applied last."""
+    found = glob.glob(os.path.join(capture_dir, "eshow-cccc-details-*.warc.gz")) + \
+            glob.glob(os.path.join(capture_dir, "eshow-cccc-2027-*.warc.gz"))
+    for warc in sorted(found, key=lambda p: re.search(r"(\d{8})\.warc\.gz$", p).group(1)):
         reqs, resps = {}, {}
         with open(warc, "rb") as f:
             for rec in ArchiveIterator(f):

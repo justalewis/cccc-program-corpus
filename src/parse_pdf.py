@@ -1,4 +1,4 @@
-"""Rule-based parser for the born-digital CCCC program PDFs (2004-2026).
+"""Rule-based parser for the born-digital CCCC program PDFs (1999, 2004-2026).
 
 Usage: python -I src/parse_pdf.py <pdf_dir> <db_path> [year ...]
 pdf_dir holds the PDFs extracted from the capture WARC (names as in SOURCES below).
@@ -12,6 +12,7 @@ import os, re, sqlite3, sys
 import pymupdf
 
 SOURCES = {
+    1999: [f"99__program__{x}.pdf" for x in ("a", "b", "c", "d", "g", "h", "i", "j", "l", "n", "wed-workshops", "sat-workshops")],
     2004: ["2004__2004completeprogram.pdf"],
     2005: ["2005__2005completeprogram.pdf"],
     2006: ["2006__2006programwednesday.pdf", "2006__2006programthursday.pdf", "2006__2006programfriday.pdf", "2006__2006programsaturday.pdf"],
@@ -49,6 +50,17 @@ NOISE = re.compile(r"(\.indd\b|^\d{1,2}/\d{1,2}/\d{2,4}\s+\d|^CCCC CONVENTION|^\
 SUFFIX = re.compile(r"^(Jr\.?|Sr\.?|II|III|IV)$")
 QUOTES_OPEN, QUOTES_CLOSE = "“", "”"
 
+LOCATION = re.compile(r"\b(Room|Floor|Level|Ballroom|Salon|Hotel|Hilton|Hyatt|Marriott|Sheraton|Westin|Convention Center|Exhibit Hall|Wing|Online|Virtual)\b")
+OPEN_END = re.compile(r"(:|,|;|[-–—]|\b(and|or|of|in|on|for|to|the|a|an|with|from|at|by|as|into|through|about|between))$", re.I)
+
+def join_title(title, line):
+    """Join a wrapped title line; a line ending in a hyphen ("Cross-") joins without a space."""
+    return (title + ("" if title.endswith("-") else " ") + line).strip()
+
+def title_continues(title):
+    """A title that ends on a colon, comma or function word goes on to the next line."""
+    return bool(OPEN_END.search(title.strip()))
+
 LIGATURES = {"ﬀ": "ff", "ﬁ": "fi", "ﬂ": "fl", "ﬃ": "ffi", "ﬄ": "ffl"}
 
 def lines_of(pdf_path):
@@ -62,6 +74,8 @@ def lines_of(pdf_path):
                 text = re.sub(r"\s+", " ", text).strip()
                 # Some programs set "fi"/"fl" as ligatures followed by a stray space ("Sheffi eld").
                 text = re.sub("([ﬀ-ﬄ]) ?", lambda m: LIGATURES[m.group(1)], text)
+                # The 1999 PDFs expose curly quotes as Windows-1252 bytes (U+0093 for “).
+                text = re.sub("[-]", lambda m: bytes([ord(m.group(0))]).decode("cp1252", "ignore"), text)
                 if text:
                     size = max((s["size"] for s in line["spans"] if s["text"].strip()), default=0)
                     yield pno, tuple(round(v, 1) for v in line["bbox"]), text, round(size, 1)
@@ -136,7 +150,9 @@ def parse_pdf(path):
         m = CODE.match(t)
         if m and len(t) < 200:
             flush_role(); role_size = None
-            cur = dict(code=f"{m.group(1)}.{int(m.group(2))}", title=m.group(3).strip(), page=pg, people=[], title_open=not m.group(3).strip())
+            title = m.group(3).strip()
+            cur = dict(code=f"{m.group(1)}.{int(m.group(2))}", title=title, page=pg, people=[],
+                       title_open=not title or title_continues(title), title_size=size if title else None)
             sessions.append(cur); role = None
             continue
         if cur is None:
@@ -160,9 +176,16 @@ def parse_pdf(path):
             continue
         if role:
             role_lines.append((pg, bb, t))
-        elif cur["title_open"] and len(cur["title"]) < 160:
-            cur["title"] = (cur["title"] + " " + t).strip()
-            if len(t) < 45 or t.endswith((".", "?")):
+        elif cur["title_open"] and len(cur["title"]) < 300:
+            if cur["title_size"] is None:  # the code stood alone; the title follows it
+                cur["title"] = join_title(cur["title"], t)
+                cur["title_size"] = size
+                cur["title_open"] = not (len(t) < 45 or t.endswith((".", "?"))) or title_continues(t)
+            elif abs(size - cur["title_size"]) <= 0.3 and not (LOCATION.search(t) and "," in t):
+                # a subtitle after "Title:" in the title's own type size (not the room line)
+                cur["title"] = join_title(cur["title"], t)
+                cur["title_open"] = title_continues(t)
+            else:
                 cur["title_open"] = False
     flush_role()
     return sessions

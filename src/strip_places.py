@@ -14,7 +14,7 @@ import glob, json, os, re, sqlite3, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # python -I leaves it off
 from enrich_ipeds import fill_ipeds, load_hd
 
-SYSTEM = re.compile(r"System|^(State|City) University of New York$")
+SYSTEM = re.compile(r"\bSystem\b|^(State|City) University of New York$")
 
 def fold(s):
     s = s.lower().replace("–", "-").replace("—", "-").replace("’", "'").replace(",", "").replace(".", "")

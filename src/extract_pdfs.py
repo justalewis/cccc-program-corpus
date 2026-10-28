@@ -1,7 +1,7 @@
 """Extract the captured program PDFs from the capture WARCs into a folder.
 
 Usage: python -I src/extract_pdfs.py <capture_dir> <out_dir>
-File names keep the path below /convention/ or /uploads/, with '/' replaced by '__'.
+File names keep the path below /convention/, /uploads/ or (Wayback) /cccc/, with '/' replaced by '__'.
 """
 import glob, os, sys
 from warcio.archiveiterator import ArchiveIterator
@@ -10,7 +10,7 @@ def main(capture_dir, out):
     os.makedirs(out, exist_ok=True)
     n = 0
     for warc in glob.glob(os.path.join(capture_dir, "*.warc.gz")):
-        if "eshow" in warc or "wayback" in warc:
+        if "eshow" in warc:
             continue
         with open(warc, "rb") as f:
             for rec in ArchiveIterator(f):
@@ -19,7 +19,12 @@ def main(capture_dir, out):
                 url = rec.rec_headers.get_header("WARC-Target-URI")
                 if not url.lower().endswith(".pdf"):
                     continue
-                name = url.split("/convention/")[-1] if "/convention/" in url else url.split("/uploads/")[-1]
+                if "/convention/" in url:
+                    name = url.split("/convention/")[-1]
+                elif "/uploads/" in url:
+                    name = url.split("/uploads/")[-1]
+                else:  # Wayback replay of www.ncte.org/cccc/99/program/a.pdf
+                    name = url.split("/cccc/")[-1]
                 with open(os.path.join(out, name.replace("/", "__")), "wb") as o:
                     o.write(rec.content_stream().read())
                 n += 1

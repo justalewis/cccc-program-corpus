@@ -2,10 +2,11 @@
 
 Usage: python -I src/match_ror.py <db_path> <cache.jsonl>
 Caches every API answer in cache.jsonl, so reruns only ask about new strings.
-Accepts ROR's own 'chosen' result; otherwise records the top candidate with its score
+Accepts ROR's own 'chosen' result when the record's names share a word with the string
+(ROR has "chosen" Hue University of Education for "Purdue University"); otherwise records the top candidate with its score
 for review but does not link it. Writes affiliation_match and institution rows.
 """
-import json, os, sqlite3, sys, time
+import json, os, re, sqlite3, sys, time, unicodedata
 import requests
 
 API = "https://api.ror.org/v2/organizations"
@@ -24,6 +25,21 @@ def name_of(org):
         if "ror_display" in n.get("types", []):
             return n["value"]
     return org.get("names", [{}])[0].get("value")
+
+GENERIC = set("university college of the and at in state community school institute for de la del du des "
+              "technology technical center centre campus city new".split())
+
+def words(s):
+    s = unicodedata.normalize("NFKD", s)
+    s = "".join(ch for ch in s if not unicodedata.combining(ch)).lower().replace("’", "").replace("'", "")
+    return {w for w in re.findall(r"[a-z]+", s) if w not in GENERIC and len(w) > 2}
+
+def shares_word(aff, org):
+    """True when a distinctive word of the printed string starts a word in any of the ROR
+    record's names, or the other way round (Penn / Pennsylvania)."""
+    mine = words(aff)
+    theirs = set().union(*(words(n["value"]) for n in org.get("names", []))) if org.get("names") else set()
+    return any(a.startswith(b) or b.startswith(a) for a in mine for b in theirs if min(len(a), len(b)) >= 4) or bool(mine & theirs)
 
 def main(db_path, cache_path):
     sys.stdout.reconfigure(encoding="utf-8")
@@ -50,11 +66,16 @@ def main(db_path, cache_path):
             if i % 200 == 0:
                 print(f"  {i}/{len(todo)}", flush=True)
     con.execute("DELETE FROM affiliation_match")
-    chosen = 0
+    chosen = refused = 0
     for a in affs:
         res = cache.get(a) or []
         top = res[0] if res else None
-        if top and top["chosen"]:
+        if top and top["chosen"] and not shares_word(a, top["org"]):
+            # ROR "chose" a record whose names share no word with the string
+            # ("Purdue University" -> Hue University of Education); leave it for an alias.
+            con.execute("INSERT INTO affiliation_match VALUES (?,?,?,?)", (a, None, "ror-chosen-refused:" + top["org"]["id"].rsplit("/", 1)[-1], top["score"]))
+            refused += 1
+        elif top and top["chosen"]:
             org = top["org"]
             ror = org["id"].rsplit("/", 1)[-1]
             ext = {e["type"]: (e.get("preferred") or (e.get("all") or [None])[0]) for e in org.get("external_ids", [])}
@@ -67,7 +88,7 @@ def main(db_path, cache_path):
             con.execute("INSERT INTO affiliation_match VALUES (?,?,?,?)", (a, None, "ror-affiliation-top:" + (top["org"]["id"].rsplit("/", 1)[-1] if top else "none"), top["score"] if top else None))
     con.execute("UPDATE appearance SET institution_id = (SELECT institution_id FROM affiliation_match m WHERE m.affiliation_as_printed = appearance.affiliation_as_printed)")
     con.commit()
-    print(f"chosen matches: {chosen} of {len(affs)} affiliation strings")
+    print(f"chosen matches: {chosen} of {len(affs)} affiliation strings; refused (no shared word): {refused}")
 
 if __name__ == "__main__":
     main(sys.argv[1], sys.argv[2])
