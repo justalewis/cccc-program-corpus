@@ -152,7 +152,7 @@ The programs are public, but this corpus aggregates them into something the prog
 
 | Job | Unlocks | Size |
 |---|---|---|
-| Store the topic-cluster labels the parser now discards, and build an area crosswalk by hand | Area trends, taxonomy history, area by institution type, year pages | Parser change plus a few hours of crosswalk |
+| Parse the "Selected Topic Guide" index at the front of each PDF program (topic headings with session codes), add eShow tracks for 2025–2026, and build an area crosswalk by hand | Area trends, taxonomy history, area by institution type, year pages | Medium: the guide is an index, not a tag on each session, and its layout varies by year |
 | Fold role spellings into about six roles | Role ladder, person strips | Small |
 | Extract SIG and standing-group names | SIG register | Small to medium |
 | Copy IPEDS control, state, coordinates, HBCU and tribal flags; add HSI eligibility | Institution mix, atlas | Small |

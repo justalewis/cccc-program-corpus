@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>{% block title %}CCCC Program Reader{% endblock %}</title>
+<link rel="stylesheet" href="/static/tokens.css"><link rel="stylesheet" href="/static/fonts.css"><link rel="stylesheet" href="/static/reader.css">
+<meta name="theme-color" content="#F5EFE1" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#171512" media="(prefers-color-scheme: dark)">
+</head><body>
+<a class="skip" href="#main">Skip to the page</a>
+<header class="site"><div class="bar">
+  <a class="brand" href="/">CCCC Program Reader<small>Who convenes the field, 1998–2027</small></a>
+  <nav aria-label="Main"><a href="/">Who convenes</a><a href="/trends">Terms</a><a href="/institutions">Institutions</a><a href="/corpus">Corpus</a><a href="/how-to-read">How to read</a><a href="/ethics">Ethics</a><a href="/about">About</a></nav>
+  <form action="/search" style="margin-left:auto"><input type="text" name="q" placeholder="Search names, titles, colleges" aria-label="Search" size="26"></form>
+</div></header>
+<main id="main">{% block main %}{% endblock %}</main>
+<footer>Counts are people <b>listed in the program</b>, not attendees. Data built {{ build_date }}. <a href="/how-to-read">How to read</a> · <a href="{{ data_url }}">Query the data</a> · <a href="{{ repo_url }}">Code and issues</a></footer>
+</body></html>

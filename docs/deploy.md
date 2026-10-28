@@ -28,6 +28,10 @@ bash deploy/deploy.sh <version>
 
 `deploy/deploy.sh` builds the database and `metadata.json` into `build/flyapp/`, copies in `deploy/Dockerfile` and `deploy/fly.toml`, and runs `flyctl deploy`. Datasette's cookie-signing secret is a Fly secret (`DATASETTE_SECRET`), set once, and is not in the repository.
 
+## The reader
+
+A second Fly app, `cccc-program-reader` (https://cccc-program-reader.fly.dev), is the research interface: the census, year, session, person and institution pages, term trends and the corpus builder. It is a separate tool from Pinakes. It is a small Flask app (`reader/`) over `reader.db`, which `reader/build_reader.py` derives from the release SQLite. Redeploy with `bash reader/deploy.sh <version>` after rebuilding the release. Person pages exist only for people listed at two or more conventions, and `data/suppressed_people.csv` lists people whose pages are removed. The reader sends `X-Robots-Tag: noindex` on every page.
+
 ## Later: inside Pinakes
 
 Pinakes plans person and institution pages, and the corpus's people should link to their articles there. So the fuller public interface belongs in the Pinakes Flask app at pinakes.wacclearinghouse.org, reading the release SQLite.

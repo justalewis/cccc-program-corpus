@@ -31,9 +31,11 @@ FIELD_DOC = {
     "conventions": {
         "year": ("integer", "Convention year (primary key)."),
         "city": ("string", "Host city as NCTE lists it; 'Virtual' for 2021 and 2022."),
-        "venue": ("string", "Not yet filled."),
-        "theme": ("string", "Not yet filled."),
-        "chair": ("string", "Not yet filled."),
+        "venue": ("string", "Not filled."),
+        "theme": ("string", "Convention theme, from NCTE's past-conventions page."),
+        "chair": ("string", "Program chair, from the same page."),
+        "dates": ("string", "Convention dates as NCTE lists them."),
+        "site": ("string", "Site as NCTE lists it, including '(Cancelled)' or 'Virtual Convention'."),
         "status": ("string", "held, cancelled (2020), virtual (2021, 2022) or upcoming (2027)."),
     },
     "sessions": {
@@ -57,6 +59,7 @@ FIELD_DOC = {
         "session_id": ("string", "sessions.id."),
         "ord": ("integer", "Order of the name within the session."),
         "role": ("string", "Role label printed before the name, as printed: Chair, Speakers, Respondent, Workshop Leader ..."),
+        "role_group": ("string", "Role folded into chair, speaker, respondent, facilitator (workshop, roundtable and discussion leaders) or other."),
         "name_as_printed": ("string", "Name exactly as printed."),
         "affiliation_as_printed": ("string", "Affiliation exactly as printed, including any city and state."),
         "paper_title": ("string", "Individual paper title where the program prints one (about half of appearances)."),
@@ -89,6 +92,12 @@ FIELD_DOC = {
         "carnegie_basic": ("integer", "Carnegie Basic classification (2021 from IPEDS HD2023; 2005 from HD2008 for closed colleges)."),
         "country": ("string", "Country code from ROR."),
         "kind": ("string", "ROR type: education, company, nonprofit, government ..."),
+        "control": ("integer", "IPEDS CONTROL: 1 public, 2 private nonprofit, 3 private for-profit."),
+        "state": ("string", "IPEDS state (US colleges)."),
+        "lat": ("number", "IPEDS latitude."),
+        "lon": ("number", "IPEDS longitude."),
+        "hbcu": ("integer", "1 if IPEDS flags a historically Black college or university."),
+        "tribal": ("integer", "1 if IPEDS flags a tribal college.")
     },
     "affiliation_matches": {
         "affiliation_as_printed": ("string", "A distinct printed affiliation."),

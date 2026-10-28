@@ -14,6 +14,7 @@ python -I src/match_ror.py build/corpus.db data/ror_cache.jsonl
 python -I src/apply_aliases.py build/corpus.db data/affiliation_aliases.csv data/ror_query_cache.jsonl
 python -I src/enrich_ipeds.py build/corpus.db data/ipeds/HD2023.zip,data/ipeds/HD2008.zip data/wikidata_ror_ipeds.csv data/affiliation_aliases_ipeds.csv
 python -I src/strip_places.py build/corpus.db data/ipeds/HD2023.zip,data/ipeds/HD2008.zip
+python -I src/enrich_more.py build/corpus.db data/themes.csv data/ipeds/HD2023.zip,data/ipeds/HD2008.zip
 python -I src/build_persons.py build/corpus.db "data/person_decisions*.csv" "data/name_merges*.csv"
 python -I src/stats.py build/corpus.db build/stats.json
 python -I src/review_people.py build/corpus.db build/review/people.html "data/person_decisions*.csv"

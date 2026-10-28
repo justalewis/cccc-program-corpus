@@ -2,3 +2,4 @@ build/
 data/ipeds/
 data/*cache*.jsonl
 __pycache__/
+reader/data/

@@ -10,32 +10,32 @@ The eShow listings for 2024–2027, the born-digital PDF programs for 2004–202
 
 | Year | Source | Sessions | Listed people | Affiliation matched | Two-year people | Two-year share* |
 |---|---|---|---|---|---|---|
-| 1998 Chicago | Web (Wayback) | 496 | 1,917 | 95% | 114 | 6.7% |
-| 1999 Atlanta (10 of 14 sections) | PDF (Wayback) | 530 | 1,527 | 96% | 116 | 8.3% |
-| 2004 San Antonio | PDF | 587 | 2,063 | 96% | 116 | 6.1% |
-| 2005 San Francisco | PDF | 536 | 2,048 | 96% | 192 | 10.2% |
-| 2006 Chicago | PDF | 588 | 2,205 | 96% | 151 | 7.4% |
-| 2007 New York | PDF | 627 | 2,215 | 97% | 172 | 8.5% |
-| 2008 New Orleans | PDF | 591 | 2,122 | 96% | 161 | 8.4% |
-| 2009 San Francisco | PDF | 662 | 2,264 | 96% | 183 | 9.0% |
-| 2010 Louisville | PDF | 670 | 2,333 | 97% | 132 | 6.0% |
-| 2011 Atlanta | PDF | 587 | 2,042 | 97% | 93 | 4.9% |
+| 1998 Chicago | Web (Wayback) | 496 | 1,915 | 95% | 114 | 6.7% |
+| 1999 Atlanta (10 of 14 sections) | PDF (Wayback) | 530 | 1,524 | 96% | 115 | 8.2% |
+| 2004 San Antonio | PDF | 587 | 2,060 | 96% | 116 | 6.2% |
+| 2005 San Francisco | PDF | 536 | 2,044 | 96% | 192 | 10.2% |
+| 2006 Chicago | PDF | 588 | 2,202 | 96% | 151 | 7.4% |
+| 2007 New York | PDF | 627 | 2,214 | 97% | 172 | 8.5% |
+| 2008 New Orleans | PDF | 591 | 2,116 | 96% | 161 | 8.4% |
+| 2009 San Francisco | PDF | 662 | 2,259 | 96% | 182 | 9.0% |
+| 2010 Louisville | PDF | 670 | 2,327 | 97% | 131 | 6.0% |
+| 2011 Atlanta | PDF | 587 | 2,040 | 97% | 93 | 4.9% |
 | 2012 St. Louis | PDF | 557 | 1,965 | 98% | 108 | 5.9% |
-| 2013 Las Vegas | PDF | 544 | 1,861 | 97% | 127 | 7.4% |
-| 2014 Indianapolis | PDF | 607 | 2,149 | 97% | 100 | 5.1% |
+| 2013 Las Vegas | PDF | 544 | 1,860 | 97% | 127 | 7.4% |
+| 2014 Indianapolis | PDF | 607 | 2,147 | 97% | 100 | 5.1% |
 | 2015 Tampa | PDF | 618 | 2,238 | 97% | 106 | 5.2% |
-| 2016 Houston | PDF | 570 | 2,113 | 97% | 120 | 6.2% |
+| 2016 Houston | PDF | 570 | 2,111 | 97% | 120 | 6.2% |
 | 2017 Portland, OR | PDF | 763 | 2,767 | 97% | 210 | 8.1% |
-| 2018 Kansas City | PDF | 615 | 2,108 | 97% | 118 | 6.0% |
-| 2019 Pittsburgh | PDF | 669 | 2,330 | 97% | 131 | 6.0% |
-| 2020 Milwaukee (cancelled) | PDF | 712 | 2,290 | 97% | 122 | 5.7% |
-| 2021 Virtual | PDF | 253 | 966 | 97% | 58 | 6.4% |
+| 2018 Kansas City | PDF | 615 | 2,107 | 97% | 118 | 6.0% |
+| 2019 Pittsburgh | PDF | 669 | 2,329 | 97% | 131 | 6.0% |
+| 2020 Milwaukee (cancelled) | PDF | 712 | 2,288 | 97% | 122 | 5.7% |
+| 2021 Virtual | PDF | 253 | 965 | 97% | 58 | 6.4% |
 | 2022 Virtual | PDF | 447 | 1,475 | 96% | 57 | 4.2% |
-| 2023 Chicago | PDF | 635 | 1,839 | 97% | 74 | 4.6% |
+| 2023 Chicago | PDF | 635 | 1,838 | 97% | 74 | 4.6% |
 | 2024 Spokane | eShow | 513 | 1,563 | 97% | 91 | 7.1% |
-| 2025 Baltimore | eShow | 867 | 1,963 | 96% | 99 | 5.7% |
-| 2026 Cleveland | eShow | 725 | 1,645 | 96% | 65 | 4.6% |
-| 2027 Milwaukee (pre-convention) | eShow | 829 | 1,426 | 96% | 42 | 3.7% |
+| 2025 Baltimore | eShow | 867 | 1,959 | 96% | 99 | 5.7% |
+| 2026 Cleveland | eShow | 725 | 1,643 | 96% | 65 | 4.6% |
+| 2027 Milwaukee (pre-convention) | eShow | 829 | 1,401 | 96% | 42 | 3.7% |
 
 \* Share of listed people at US institutions with an IPEDS record whose institution is two-year (IPEDS level 2, or Carnegie Basic 1–14). These are people *listed in the program*, not registrants or attendees. 1999 counts only the ten letter sections whose PDFs survive (E, F, K and M are titles only). 2020 is the printed program of a convention that was cancelled. 2021 and 2022 were virtual. The 2027 listing will change before the convention. The source changes from PDF to eShow at 2024, so treat a step between 2023 and 2024 with care.
 
@@ -72,6 +72,8 @@ metadata.yml             Datasette metadata with the counting caveats
 Inputs that are not in git: the private capture folder (`../CCCC-Program-Capture`, NCTE's files), `data/ipeds/HD2023.zip` and `HD2008.zip` (from https://nces.ed.gov/ipeds/datacenter/data/), and the ROR caches, which rebuild themselves.
 
 To browse locally: `datasette build/corpus.db -m metadata.yml`
+
+Reader (research interface): https://cccc-program-reader.fly.dev, built from `reader/`. Run locally with `READER_DB=build/reader.db flask --app reader/app.py run`; build `reader.db` with `python -I reader/build_reader.py <release_dir> build/reader.db`.
 
 Public view: https://cccc-program-corpus.fly.dev (Datasette over the release database; see `docs/deploy.md`).
 

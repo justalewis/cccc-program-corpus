@@ -1,0 +1,14 @@
+{% extends "base.html" %}{% block title %}About · CCCC Program Reader{% endblock %}
+{% block main %}
+<h1>About</h1>
+<p class="lede">The CCCC Program Reader is a working tool for studying who appears in the programs of the Conference on College Composition and Communication. It is a draft and changes often.</p>
+<h2>Where it comes from</h2>
+<p>The programs are NCTE's. The reader's data is a parse of them: sessions, the names listed in each, the affiliations as printed, and paper titles. It leaves out NCTE's session descriptions. The corpus behind it is public, with its code and method, at <a href="{{ repo_url }}">{{ repo_url }}</a>, and the tables can be queried at <a href="{{ data_url }}">{{ data_url }}</a>.</p>
+<h2>What it is for</h2>
+<p>It is built to ground three kinds of work: who convenes the field and how that has changed (disciplinography), how the organization's own categories and formats changed (historiography), and trends in topics and participation. The first question it answers is the one on the home page.</p>
+<h2>How to cite</h2>
+<p>Cite the page you used (each session page ends with a citation), or cite a downloaded corpus with the citation the <a href="/corpus">corpus builder</a> prints. Data was built {{ build_date }}.</p>
+<h2>What it does not have yet</h2>
+<p>2000–2003 and the years before 1998 (they need the printed programs), proposal areas for the PDF years, calls for proposals, and links from papers to later articles.</p>
+<p class="small">Sibling projects: <a href="https://pinakes.wacclearinghouse.org">Pinakes</a>, an index of rhetoric and composition scholarship, and the WPA-L Archive Reader.</p>
+{% endblock %}
