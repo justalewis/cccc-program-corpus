@@ -15,6 +15,7 @@
 </div>
 <div class="cols"><div>
 <h2>Roles</h2><ul class="plain">{% for r in roles %}<li>{{ r.role_group or 'other' }}: {{ r.n|num }}</li>{% endfor %}</ul>
+{% if area_rows %}<h2>Proposal areas</h2><ul class="plain">{% for a in area_rows %}<li><a href="/area/{{ a.area|urlencode }}">{{ a.area }}</a>: {{ a.n|num }}</li>{% endfor %}</ul><p class="small">As the program printed them. <a href="/areas">How the areas changed over time</a>.</p>{% endif %}
 {% if formats %}<h2>Formats</h2><ul class="plain">{% for f,n in formats %}<li>{{ f }}: {{ n|num }}</li>{% endfor %}</ul>{% endif %}
 <h2>Source files</h2><ul class="plain">{% for d in docs %}<li class="small">{% if d.public_url %}<a href="{{ d.public_url }}">{{ d.url.split('__')[-1] if d.kind == 'pdf' else d.url[-40:] }}</a>{% else %}{{ d.url }}{% endif %}</li>{% endfor %}</ul>
 <p class="small">Links go to NCTE's own copy where it is still online, or to the Wayback Machine.</p>

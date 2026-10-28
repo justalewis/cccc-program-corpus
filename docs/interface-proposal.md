@@ -72,7 +72,7 @@ These come from what already works in Pinakes and the WPA-L reader.
 
 | Tool | What it shows | Ready |
 |---|---|---|
-| **Area trends** | Share of sessions in each proposal area by year, using CCCC's own headings. | Step (store the labels, build the crosswalk) |
+| **Area trends** | Share of sessions in each proposal area by year, using CCCC's own headings. | Built (draft crosswalk), at /areas |
 | **Taxonomy history** | The areas themselves as a lineage chart: when each heading appears, is renamed, splits, merges or retires. This is the organization's changing self-description, and probably the most original historiographic view the corpus offers. | Step |
 | **Term trajectories** | Up to six words or phrases per 1,000 titles, by year, with the breaks marked and click-through to the titles. Same interface as WPA-L's trends page, so a term can be read across both corpora. | Now (word-boundary search needs an FTS or regex step) |
 | **Firsts ledger** | The first sessions to use a term in the field's sense, with each entry checked by a person and annotated. A historiography tool that also corrects the trend chart's naive first point. | Step (review queue) |
@@ -152,7 +152,7 @@ The programs are public, but this corpus aggregates them into something the prog
 
 | Job | Unlocks | Size |
 |---|---|---|
-| Parse the "Selected Topic Guide" index at the front of each PDF program (topic headings with session codes), add eShow tracks for 2025–2026, and build an area crosswalk by hand | Area trends, taxonomy history, area by institution type, year pages | Medium: the guide is an index, not a tag on each session, and its layout varies by year |
+| Done: proposal areas read from the italic line above each session (2004–2017, 2019–2026), matched by code; 2018's hashtags kept as tags; draft family crosswalk. Still to do: a second reader for the crosswalk, and the SIG register | Area trends, taxonomy history, area by institution type, year pages | Small now |
 | Fold role spellings into about six roles | Role ladder, person strips | Small |
 | Extract SIG and standing-group names | SIG register | Small to medium |
 | Copy IPEDS control, state, coordinates, HBCU and tribal flags; add HSI eligibility | Institution mix, atlas | Small |

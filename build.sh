@@ -10,6 +10,7 @@ python -I src/extract_pdfs.py "$CAPTURE" build/pdf
 python -I src/parse_pdf.py build/pdf build/corpus.db
 python -I src/parse_html_1990s.py "$CAPTURE" build/corpus.db
 python -I src/merge_pdf_titles.py build/corpus.db 2024 2025 2026
+python -I src/parse_areas.py build/pdf build/corpus.db data/area_crosswalk.csv
 python -I src/match_ror.py build/corpus.db data/ror_cache.jsonl
 python -I src/apply_aliases.py build/corpus.db data/affiliation_aliases.csv data/ror_query_cache.jsonl
 python -I src/enrich_ipeds.py build/corpus.db data/ipeds/HD2023.zip,data/ipeds/HD2008.zip data/wikidata_ror_ipeds.csv data/affiliation_aliases_ipeds.csv

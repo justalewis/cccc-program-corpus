@@ -7,7 +7,7 @@ Status, 28 October 2026. No public interface has been designed yet. The corpus h
 | Field | Years | Notes |
 |---|---|---|
 | Session code and title | 1998, 1999, 2004–2027 | 16,064 sessions; titles for all but 36 |
-| Proposal area | 2025 and 2026 per session (eShow `tracks`); PDF years only as a front-matter "Selected Topic Guide" index | The PDFs do not tag each session with an area. They print a topic guide near the front that lists session codes under topic headings (10–16 a year, renamed over time), and that index still has to be parsed. 1999 has no guide. |
+| Proposal area | Every year 2004–2017 and 2019–2026, from an italic line above each session in the PDF programs; 2025–2026 also as eShow `tracks` | Stored in `session.area` (as CCCC printed it that year), with `area_group` mapping renamed headings onto 15 families (a draft crosswalk in `data/area_crosswalk.csv`). 2018 prints three hashtags instead (`topic_tags`). Workshops, SIG meetings and many special sessions carry no area. 2011, 2015, 2016 and 2024–25 add a convention theme track that takes in a large share. |
 | eShow tracks (proposal areas) | 2025, 2026 | 17–21 areas, e.g. "First-Year Writing," "Antiracism and Social Justice" |
 | Session type | eShow years, 2024–2027 | Panel, individual presentation, roundtable, workshop, poster, SIG, Engaged Learning Experience |
 | Audience level | 2024 only | Two-year, four-year, graduate |
@@ -30,7 +30,7 @@ Each entry gives what the tool shows, what it needs, and whether the data is rea
 
 ### Topics
 
-1. **Topic-area trends.** Share of sessions in each proposal area by year: Basic Writing, Writing Programs, Information Technologies, and so on. Needs the topic guides parsed and a crosswalk across renamed areas (2005's "Practices of Teaching Writing" becomes 2013's "Teaching Writing & Rhetoric" and 2019's "Writing Pedagogies and Processes"). *Ready after one parser change plus a hand-built crosswalk.*
+1. **Topic-area trends.** Share of sessions in each proposal area by year: Basic Writing, Writing Programs, Information Technologies, and so on. Data is in (see the area row above); the family crosswalk is a draft that needs a second reader across renamed areas (2005's "Practices of Teaching Writing" becomes 2013's "Teaching Writing & Rhetoric" and 2019's "Writing Pedagogies and Processes"). *Ready after one parser change plus a hand-built crosswalk.*
 2. **Term trends in titles.** How often a word or phrase appears in session and paper titles by year ("multimodal," "translingual," "antiracist," "AI," "labor," "transfer"), as raw counts and as a share of titles. Works on titles alone. *Ready now.*
 3. **Term search with context.** Type a term and see the titles that use it, grouped by year, with links to the sessions. *Ready now.*
 4. **Emerging and fading terms.** Words whose share rose or fell most between two periods, with the first year each appears. *Ready now*, with the caveat that 2000–2003 is missing.
@@ -101,7 +101,7 @@ Datasette with a few custom pages would work as a private prototype before anyth
 
 ## Suggested order
 
-1. Parse the PDF topic guides, add eShow tracks, and build the area crosswalk (unlocks items 1, 6, 17).
+1. Review the draft area crosswalk (done: areas parsed for 2004–2026, live in the reader at /areas).
 2. Copy the remaining IPEDS columns: control, state, coordinates, HBCU and tribal flags (13, 14, 15).
 3. Load themes and chairs from NCTE's past-conventions page (17, 20).
 4. Fold role spellings into a few categories (10).

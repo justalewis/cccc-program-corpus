@@ -6,7 +6,7 @@ import csv, os, sqlite3, sys
 
 TABLES = {
     "conventions": "select * from convention order by year",
-    "sessions": "select id, year, source_document_id, parent_id, code, title, session_type, audience_level, tracks, dates, time_label, room, cancelled from session order by year, code, id",
+    "sessions": "select id, year, source_document_id, parent_id, code, title, session_type, audience_level, tracks, area, area_group, topic_tags, dates, time_label, room, cancelled from session order by year, code, id",
     "appearances": """select a.id, s.year, a.session_id, a.ord, a.role, a.role_group, a.name_as_printed, a.affiliation_as_printed, a.paper_title,
                       a.person_id, a.institution_id, a.source_document_id, a.page
                       from appearance a join session s on s.id = a.session_id order by s.year, a.session_id, a.ord""",

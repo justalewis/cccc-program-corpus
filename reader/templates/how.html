@@ -13,6 +13,8 @@
 <p>People are joined across years when the printed names match exactly (case, punctuation and accents are folded), plus pairs a reviewer has marked as the same person. “Jim Brown” and “James Brown” are two names until a reviewer joins them, so near-duplicate names can inflate the count of first listings and lower the count of returners. Two different people with the same name become one, and names a reviewer has not checked are marked on their pages.</p>
 <h2>Institutions</h2>
 <p>A printed affiliation is matched to a record in ROR and, for US colleges, to IPEDS. IPEDS says whether a college is two-year (IPEDS level 2, or Carnegie basic class 1–14). Shares of institution types use people whose institution matched a US college in IPEDS. About 3% of printed affiliations match nothing: independent scholars, schools, publishers and a long tail.</p>
+<h2>Proposal areas</h2>
+<p>From 2004 through 2026 (except 2018) the programs print an area above most sessions. We read those lines as CCCC printed them. They agree with eShow's own track tags for every 2025 and 2026 session that has both. Workshops, special interest group meetings and many special sessions carry none, so shares are of sessions that have one. The <i>families</i> that join a renamed area across years (for example, Practices of Teaching Writing in 2005 and Approaches to Teaching and Learning in 2023) are a draft of ours, listed in <code>data/area_crosswalk.csv</code>, and they need a second reader.</p>
 <h2>Notes by year</h2>
 <ul>{% for y,n in notes %}<li><a href="/year/{{ y }}">{{ y }}</a>: {{ n }}</li>{% endfor %}</ul>
 <h2>Terms</h2>

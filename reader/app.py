@@ -167,10 +167,11 @@ def year(y):
                WHERE iy.year = ? ORDER BY iy.appearances DESC, i.name LIMIT 25""", y)
     docs = q("SELECT DISTINCT d.id, d.url, d.public_url, d.kind FROM source_documents d JOIN sessions s ON s.source_document_id = d.id WHERE s.year = ?", y)
     roles = q("SELECT role_group, count(*) n FROM appearances WHERE year = ? GROUP BY 1 ORDER BY n DESC", y)
+    area_rows = q("SELECT area, area_group, count(*) n FROM sessions WHERE year = ? AND area IS NOT NULL AND parent_id IS NULL GROUP BY 1, 2 ORDER BY n DESC", y)
     formats = json.loads(c["formats"] or "{}")
     prev = q1("SELECT max(year) y FROM census WHERE year < ?", y)["y"]
     nxt = q1("SELECT min(year) y FROM census WHERE year > ?", y)["y"]
-    return render_template("year.html", y=y, c=cen, conv=conv, sessions=sessions, top=top, docs=docs, roles=roles,
+    return render_template("year.html", y=y, c=cen, conv=conv, sessions=sessions, top=top, docs=docs, roles=roles, area_rows=area_rows,
                            formats=sorted(formats.items(), key=lambda t: -t[1]), note=YEAR_NOTES.get(y), prev=prev, next=nxt)
 
 @app.route("/session/<path:sid>")
@@ -292,6 +293,36 @@ def search():
                              JOIN person_summary ps ON ps.person_id = f.person_id WHERE people_fts MATCH ? ORDER BY rank LIMIT 25""",
                           fts_query(text))
     return render_template("search.html", text=text, res=res)
+
+# ---- proposal areas ----------------------------------------------------------------------
+
+THEME_GROUP = "Convention theme track"
+
+@app.route("/areas")
+def areas():
+    rows = q("""SELECT year, area_group, area, count(*) AS n FROM sessions WHERE area IS NOT NULL AND parent_id IS NULL
+                GROUP BY year, area_group, area ORDER BY year, n DESC""")
+    years = sorted({r["year"] for r in rows})
+    groups = {}
+    for r in rows:
+        g = r["area_group"] or "Not in a family"
+        groups.setdefault(g, {}).setdefault(r["year"], []).append((r["area"], r["n"]))
+    order = sorted(groups, key=lambda g: (g == THEME_GROUP, g == "Not in a family", -sum(n for v in groups[g].values() for _, n in v)))
+    totals = {y: sum(n for g in groups.values() for a, n in g.get(y, [])) for y in range(1998, 2028)}
+    allyears = {r["year"]: r["sessions"] for r in q("SELECT year, sessions FROM census")}
+    series = [{"group": g, "counts": {y: sum(n for a, n in groups[g].get(y, [])) for y in range(1998, 2028)}} for g in order]
+    return render_template("areas.html", years=years, groups=groups, order=order, theme=THEME_GROUP, allyears=allyears,
+                           data=json.dumps({"years": list(range(1998, 2028)), "series": series, "breaks": BREAKS, "theme": THEME_GROUP,
+                                            "tagged": totals, "sessions": allyears}))
+
+@app.route("/area/<path:name>")
+def area(name):
+    rows = q("""SELECT s.id, s.year, s.code, s.title FROM sessions s WHERE (s.area = ? OR s.area_group = ?) AND s.parent_id IS NULL
+                ORDER BY s.year, s.code LIMIT 600""", name, name)
+    if not rows:
+        abort(404)
+    by_year = q("SELECT year, count(*) n FROM sessions WHERE (area = ? OR area_group = ?) AND parent_id IS NULL GROUP BY year ORDER BY year", name, name)
+    return render_template("area.html", name=name, rows=rows, by_year=by_year)
 
 # ---- term trends -------------------------------------------------------------------------
 
