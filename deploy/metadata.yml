@@ -1,0 +1,78 @@
+title: CCCC Convention Program Corpus
+description_html: |
+  <p>Sessions and listed participants from the programs of the Conference on College Composition and Communication (CCCC), 1998, 1999 and 2004–2027: the 1998 web program and 1999 PDFs from the Wayback Machine, NCTE's PDF programs for 2004–2023, and NCTE's eShow listings for 2024–2027. Names, affiliations and titles are as printed. Affiliations are matched to ROR and, for US colleges, to IPEDS.</p>
+  <p><b>Read before counting.</b> These are people <i>listed in the program</i>, not registrants or attendees. 2000–2003 and the years before 1998 aren't in yet. 2020 is the program of a cancelled convention; 2021 and 2022 were virtual; 2027 is the listing before the convention and will change. The source changes from PDF to eShow at 2024. People are joined across years on an exact name, plus pairs a person has reviewed; check <code>people.method</code> before counting careers. NCTE's session descriptions are not included.</p>
+  <p>This is a working version and will change. To correct an entry, open an issue on the repository.</p>
+source: Source code, methods and known limits
+source_url: https://github.com/justalewis/cccc-program-corpus
+databases:
+  cccc:
+    tables:
+      year_summary:
+        description: "One row per convention year in the corpus. two_year_share = people at two-year colleges / people at US institutions with an IPEDS record."
+        sort: year
+      sessions:
+        description: "One row per session as printed. Codes and titles are as printed; 2024–2027 add eShow's session type, tracks, times and rooms."
+        facets: [year, session_type]
+        fts_table: sessions_fts
+        fts_pk: rowid
+      appearances:
+        description: "One row per name listed in a session, with the name, affiliation and paper title exactly as printed, and the matched person and institution."
+        facets: [year, role]
+        fts_table: appearances_fts
+        fts_pk: rowid
+        label_column: name_as_printed
+      people:
+        description: "Name clusters across years. exact-name = one institution or none; exact-name;moves = several institutions in sequence, read as job changes; exact-name;review = not yet checked; near-name-reviewed = two spellings joined by a reviewer."
+        facets: [method]
+        label_column: display_name
+      institutions:
+        description: "ROR records (ror:) and IPEDS-only colleges (ipeds:). two_year = 1 when IPEDS ICLEVEL is 2 or the Carnegie Basic class is 1–14."
+        facets: [two_year, country, kind]
+        fts_table: institutions_fts
+        fts_pk: rowid
+        label_column: name
+      affiliation_matches:
+        description: "Each distinct printed affiliation and how it was matched. ror-affiliation-top and ror-chosen-refused rows record a guess that was not accepted."
+        facets: [method]
+      conventions:
+        description: "Every CCCC convention year, 1949–2027, with city and status."
+      source_documents:
+        description: "The program file or page each row was read from."
+    queries:
+      term_by_year:
+        title: A word or phrase in titles, by year
+        description: "Session and paper titles that contain the term, per year, with the share of that year's titles. Case-insensitive substring match."
+        sql: |-
+          with t as (
+            select year, title as t from sessions where title is not null
+            union all
+            select year, paper_title from appearances where paper_title is not null
+          )
+          select year, count(*) as titles,
+                 sum(instr(lower(t), lower(:term)) > 0) as with_term,
+                 round(100.0 * sum(instr(lower(t), lower(:term)) > 0) / count(*), 2) as percent
+          from t group by year order by year
+      person_appearances:
+        title: Every listing for a name
+        description: "All appearances whose printed name contains the text, oldest first."
+        sql: |-
+          select a.year, s.code, s.title as session, a.role, a.name_as_printed, a.affiliation_as_printed, a.paper_title, a.person_id
+          from appearances a join sessions s on s.id = a.session_id
+          where a.name_as_printed like '%' || :name || '%'
+          order by a.year, s.code
+      institution_by_year:
+        title: An institution's listings by year
+        description: "Listed appearances per year for institutions whose name contains the text."
+        sql: |-
+          select a.year, i.name as institution, count(*) as appearances, count(distinct a.person_id) as people
+          from appearances a join institutions i on i.id = a.institution_id
+          where i.name like '%' || :institution || '%'
+          group by a.year, i.name order by i.name, a.year
+      top_institutions:
+        title: Most-listed institutions in a year
+        sql: |-
+          select i.name as institution, i.two_year, count(*) as appearances, count(distinct a.person_id) as people
+          from appearances a join institutions i on i.id = a.institution_id
+          where a.year = :year
+          group by i.id order by appearances desc limit 50

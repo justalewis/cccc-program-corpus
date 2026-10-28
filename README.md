@@ -73,6 +73,8 @@ Inputs that are not in git: the private capture folder (`../CCCC-Program-Capture
 
 To browse locally: `datasette build/corpus.db -m metadata.yml`
 
+Public view: https://cccc-program-corpus.fly.dev (Datasette over the release database; see `docs/deploy.md`).
+
 ## Reviewing
 
 - `build/review/index.html`: 40 random PDF sessions beside the program page. Tick what's wrong and download the CSV.

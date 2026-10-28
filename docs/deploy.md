@@ -1,57 +1,52 @@
-# Deploying a usable version
+# Deploying the public view
 
-Recommendation, 28 October 2026. Nothing has been deployed.
+## What is running
 
-## Recommendation: two stages
+A public Datasette instance on Fly.io, app `cccc-program-corpus` (region `sjc`), at https://cccc-program-corpus.fly.dev. Justin chose public access with no login on 28 October 2026.
 
-### Stage 1, now: a private Datasette instance on Fly.io
+It serves the **release** database, not `build/corpus.db`. The release has no session descriptions and no eShow keys. On top of the release, `src/deploy_db.py` adds:
 
-The corpus is one read-only SQLite file of about 30 MB. Datasette serves a file like that with no application code. It gives:
+- full-text search on session titles, names, affiliations, paper titles and institution names
+- indexes on the join columns
+- a `year_summary` table
 
-- browsing, full-text search and faceting on every table
-- CSV and JSON for any view
-- saved ("canned") queries
-- custom page templates that can become the year, person and institution pages in `tools-and-interface.md`
+`deploy/metadata.yml` holds the caveats shown on every page and four saved queries:
 
-Charts come from plugins: `datasette-vega` or `datasette-plot` for trends, and `datasette-cluster-map` for the map once the IPEDS coordinates are copied in.
+- a term in titles, by year
+- every listing for a name
+- an institution's listings by year
+- the most-listed institutions in a year
 
-Why Fly.io:
+The machine stops when idle and starts on the next request, so the first page after a quiet spell takes a few seconds.
 
-- `datasette publish fly` (the `datasette-publish-fly` plugin) packages the database and deploys it with one command.
-- The Fly account from Pinakes's first host already exists.
-- A small machine that stops when idle costs a few dollars a month at most.
-
-Keep it private until the rights question is settled. Either add the `datasette-auth-passwords` plugin, or put Cloudflare Access in front, since the Cloudflare account is already in use. Deploy the **release** SQLite (`build/release/.../cccc-program-corpus.sqlite`), which has no session descriptions and no eShow keys, not `build/corpus.db`.
-
-Sketch (to run once Justin approves):
+## Redeploying
 
 ```
-pip install datasette datasette-publish-fly datasette-auth-passwords datasette-vega
-datasette publish fly build/release/cccc-program-corpus-v0.1.0-draft/cccc-program-corpus.sqlite \
-  --app cccc-program-corpus -m metadata.yml \
-  --install datasette-auth-passwords --install datasette-vega \
-  --plugin-secret datasette-auth-passwords root_password_hash '<hash>'
+python -I src/release.py build/corpus.db build/stats.json build/release <version>
+bash deploy/deploy.sh <version>
 ```
 
-### Stage 2, when it goes public: inside Pinakes
+`deploy/deploy.sh` builds the database and `metadata.json` into `build/flyapp/`, copies in `deploy/Dockerfile` and `deploy/fly.toml`, and runs `flyctl deploy`. Datasette's cookie-signing secret is a Fly secret (`DATASETTE_SECRET`), set once, and is not in the repository.
 
-Pinakes already plans person and institution pages, and the corpus's people should link to their articles there. So the public version belongs in the Pinakes Flask app at pinakes.wacclearinghouse.org, reading the release SQLite.
+## Later: inside Pinakes
 
-Files can't be copied from this machine to the Clearinghouse server. Two ways in:
+Pinakes plans person and institution pages, and the corpus's people should link to their articles there. So the fuller public interface belongs in the Pinakes Flask app at pinakes.wacclearinghouse.org, reading the release SQLite.
 
-1. The server downloads the release zip from Zenodo by its DOI.
-2. It pulls from git.
+Files can't be copied from this machine to the Clearinghouse server, so the server would either:
 
-Both avoid copying files by hand. A Datasette instance can stay up beside Pinakes as the "query the data" view, linked from the Pinakes pages.
+1. download the release zip from Zenodo by DOI, or
+2. pull from git.
+
+The Datasette instance can stay up beside it as the "query the data" view.
 
 ## Alternatives considered
 
-- **Static site from the SQLite file** (pages generated at build time, or Datasette Lite loading the file in the browser). There's no server, so hosting on Cloudflare Pages is free. But it's public by default, and every change means a rebuild. It works well for Stage 2's public face, and less well for a private working copy.
-- **A custom app now.** Too early. The interface isn't designed, and NCTE hasn't been asked about the descriptions yet.
-- **The Clearinghouse server for Stage 1.** It adds a deploy path that has to be pasted by hand, and it puts unpublished data on someone else's server.
+- **A static site** (pages generated at build time, or Datasette Lite loading the file in the browser). There's no server, and Cloudflare Pages hosts it free. A good fit for a later public face; every change means a rebuild.
+- **A custom app now.** Too early. The interface in `tools-and-interface.md` isn't designed yet.
+- **The Clearinghouse server now.** Its deploy path has to be pasted by hand.
 
-## Before anything public
+## Still open
 
-- Decide the data license (CC0 or CC BY 4.0) and whether to notify or ask NCTE.
-- Keep session descriptions out until NCTE agrees.
-- Have a corrections route for listed people (the release README has a placeholder).
+- The data license (CC0 or CC BY 4.0) and the code license. Until a license is chosen, the default is all rights reserved.
+- Whether to notify or ask NCTE.
+- A corrections route. For now the site points to the repository's issues.
