@@ -2,7 +2,7 @@ title: CCCC Convention Program Corpus
 description_html: |
   <p>Sessions and listed participants from the programs of the Conference on College Composition and Communication (CCCC), 1998, 1999 and 2004–2027: the 1998 web program and 1999 PDFs from the Wayback Machine, NCTE's PDF programs for 2004–2023, and NCTE's eShow listings for 2024–2027. Names, affiliations and titles are as printed. Affiliations are matched to ROR and, for US colleges, to IPEDS.</p>
   <p><b>Read before counting.</b> These are people <i>listed in the program</i>, not registrants or attendees. 2000–2003 and the years before 1998 aren't in yet. 2020 is the program of a cancelled convention; 2021 and 2022 were virtual; 2027 is the listing before the convention and will change. The source changes from PDF to eShow at 2024. People are joined across years on an exact name, plus pairs a person has reviewed; check <code>people.method</code> before counting careers. NCTE's session descriptions are not included.</p>
-  <p>This is a working version and will change. To correct an entry, open an issue on the repository.</p>
+  <p>This is a working version and will change. To correct an entry, write to justalewis1@gmail.com or open an issue on the repository.</p>
 source: Source code, methods and known limits
 source_url: https://github.com/justalewis/cccc-program-corpus
 databases:

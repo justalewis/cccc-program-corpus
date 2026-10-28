@@ -3,9 +3,11 @@
 Run locally:  READER_DB=build/reader.db flask --app reader/app.py run
 Every page is noindex. Person pages exist only for people listed at two or more conventions.
 """
-import csv, io, json, os, re, sqlite3
+import csv, io, json, os, re, sqlite3, sys
 from datetime import date
 from flask import Flask, Response, abort, g, render_template, request
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import analytics as AN
 
 DB = os.environ.get("READER_DB", os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "reader.db"))
 SITE_URL = os.environ.get("READER_URL", "https://cccc-program-reader.fly.dev")
@@ -427,6 +429,42 @@ def group(gid):
                   GROUP BY ps.person_id ORDER BY yrs DESC, ps.display_name LIMIT 40""", gid)
     n_all = q1("SELECT count(DISTINCT a.person_id) n FROM appearances a JOIN sessions s ON s.id = a.session_id WHERE s.group_id = ?", gid)["n"]
     return render_template("group.html", g=g, sess=sess, people=people, n_all=n_all)
+
+# ---- tools hub, anatomy, area by institution type, atlas, network -------------------------
+
+@app.route("/tools")
+def tools():
+    return render_template("tools.html")
+
+@app.route("/anatomy")
+def anatomy():
+    counts, sizes = AN.formats(db())
+    years = sorted(counts)
+    return render_template("anatomy.html", years=years, counts=counts, sizes=sizes, formats=AN.FORMATS,
+                           data=json.dumps({"years": list(range(1998, 2028)), "formats": AN.FORMATS, "counts": counts,
+                                            "sizes": {y: {"mean": v[0], "median": v[1]} for y, v in sizes.items()}, "breaks": BREAKS}))
+
+@app.route("/area-types")
+def area_types():
+    period = request.args.get("period", "2019–2026")
+    period = period if period in AN.PERIODS else "2019–2026"
+    return render_template("area_types.html", period=period, periods=list(AN.PERIODS), types=AN.TYPES, d=AN.area_by_type(db(), period))
+
+@app.route("/atlas")
+def atlas():
+    years = [r["year"] for r in q("SELECT DISTINCT year FROM inst_year ORDER BY year")]
+    y = request.args.get("year", type=int)
+    y = y if y in years else 2005
+    return render_template("atlas.html", years=years, y=y, a=AN.atlas_year(db(), y), host=AN.host_draw(db()),
+                           data=json.dumps(AN.atlas_year(db(), y)))
+
+@app.route("/network")
+def network():
+    era = request.args.get("era", "2016–2020")
+    era = era if era in AN.ERAS else "2016–2020"
+    net = AN.network(db(), era)
+    return render_template("network.html", era=era, eras=list(AN.ERAS), net=net, data=json.dumps(net, ensure_ascii=False),
+                           teams=AN.teams(db()), bridges=AN.bridges(db()))
 
 # ---- term trends -------------------------------------------------------------------------
 
