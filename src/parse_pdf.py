@@ -130,6 +130,55 @@ def plausible_name(name):
     return (1 < len(words) <= 5 and name[:1].isupper() and not name.isupper()
             and not NOT_NAME.search(name) and not re.search(r"\b(and|the|of|in|for|with|this|you)\b", name))
 
+FIRST_NAMES = {l.strip() for l in open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "first_names.txt"), encoding="utf-8")
+               if l.strip() and not l.startswith("#")}
+INST_WORD = re.compile(r"\b(University|College|Institute|School|Academy|Universidad|Université)\b", re.I)
+
+INLINE_ROLE = re.compile(r"\s*(?<![a-z])((?:Co-)?Chairs?|Speakers?|Respondents?|Presenters?|Panelists?|Facilitators?)\s*:\s*")
+AND_END = re.compile(r"(,?\s*(and|&))+$")
+
+def split_merged(name, aff, title):
+    """Split an entry that holds two or more presenters, where the program set them on one line:
+    "A, Univ X, City, B, Univ Y" or "A, Univ X, City B, Univ Y". A second name is two to four words
+    starting with a common first name, ending a comma segment, with an institution right after it."""
+    out, role = [], None
+    while aff:
+        # a role label the line break failed to separate: "..., Fredericksburg, VA Speakers: Tabetha Adkins, ..."
+        lab = INLINE_ROLE.search(aff)
+        if lab:
+            head, rest = aff[:lab.start()].strip(" ,"), aff[lab.end():]
+            q = parse_entry(rest)
+            if q and plausible_name(q[0]):
+                people = split_merged(name, head or None, None)
+                tail = split_merged(q[0], q[1], title)
+                return [(n, a, t, r) for n, a, t, r in people] + [(n, a, t, r or lab.group(1)) for n, a, t, r in tail]
+        segs = [s.strip() for s in aff.split(",")]
+        cut = None
+        for i in range(1, len(segs) - 1):
+            words = segs[i].split()
+            for k in (4, 3, 2):  # longest first: "Mary Jo Reiff", not "Jo Reiff"
+                if k > len(words):
+                    continue
+                cand = " ".join(words[-k:])
+                if words[-k] in FIRST_NAMES and plausible_name(cand) and INST_WORD.search(segs[i + 1]):
+                    cut = (i, len(words) - k, cand); break
+            if cut:
+                break
+        if not cut:
+            break
+        i, keep, cand = cut
+        first_aff = ", ".join(segs[:i] + ([" ".join(segs[i].split()[:keep])] if keep else []))
+        out.append((name, AND_END.sub("", first_aff).strip() or None, role))
+        name, aff = cand, ", ".join(segs[i + 1:])
+    out.append((name, aff, role))
+    # a repeated person in the same entry is a typesetting echo
+    seen, people = set(), []
+    for n, a, r in out:
+        if (n, a) not in seen:
+            seen.add((n, a)); people.append([n, a, None, r])
+    people[-1][2] = title
+    return [tuple(x) for x in people]
+
 def parse_pdf(path):
     sessions, cur, role, role_lines, role_size = [], None, None, [], None
     all_lines = [l for l in lines_of(path) if not NOISE.search(l[2])]
@@ -143,7 +192,8 @@ def parse_pdf(path):
             for pg, bb, t in entries:
                 p = parse_entry(t)
                 if p and plausible_name(p[0]):
-                    cur["people"].append(dict(role=role, name=p[0], aff=p[1], title=p[2], page=pg, bbox=bb))
+                    for name, aff, title, r in split_merged(*p):
+                        cur["people"].append(dict(role=r or role, name=name, aff=aff, title=title, page=pg, bbox=bb))
         role_lines = []
 
     for idx, (pg, bb, t, size) in enumerate(all_lines):

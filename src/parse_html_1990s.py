@@ -13,7 +13,7 @@ sessions missing from the PDFs are added here with their titles and no people.
 import glob, hashlib, html, os, re, sqlite3, sys
 from warcio.archiveiterator import ArchiveIterator
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # python -I leaves it off
-from parse_pdf import ROLE, parse_entry, plausible_name
+from parse_pdf import ROLE, parse_entry, plausible_name, split_merged
 
 CODE_IN = re.compile(r"\b([A-Z]{1,4})\s*\.\s*(\d{1,3})\b")
 ENTRY_SPLIT = re.compile(r"<p\b[^>]*>|<br\s*/?>\s*<br\s*/?>", re.I)
@@ -60,7 +60,8 @@ def parse_1998(page):
                 role, t = r.group(1), r.group(2)
             p = parse_entry(t.replace('""', '"'))
             if p and plausible_name(p[0]):
-                people.append(dict(role=role, name=p[0], aff=p[1], title=p[2]))
+                for name, aff, title, r2 in split_merged(*p):
+                    people.append(dict(role=r2 or role, name=name, aff=aff, title=title))
             if r and role.lower().startswith(("chair", "co-chair")):
                 role = "Speaker"  # the people after a chair line are speakers unless labeled
         sessions.append(dict(code=f"{m.group(1)}.{int(m.group(2))}", title=title, people=people))
