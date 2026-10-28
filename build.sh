@@ -11,7 +11,8 @@ python -I src/parse_pdf.py build/pdf build/corpus.db
 python -I src/merge_pdf_titles.py build/corpus.db 2024 2025 2026
 python -I src/match_ror.py build/corpus.db data/ror_cache.jsonl
 python -I src/apply_aliases.py build/corpus.db data/affiliation_aliases.csv data/ror_query_cache.jsonl
-python -I src/enrich_ipeds.py build/corpus.db data/ipeds/HD2023.zip data/wikidata_ror_ipeds.csv
+python -I src/enrich_ipeds.py build/corpus.db data/ipeds/HD2023.zip,data/ipeds/HD2008.zip data/wikidata_ror_ipeds.csv data/affiliation_aliases_ipeds.csv
+python -I src/strip_places.py build/corpus.db data/ipeds/HD2023.zip,data/ipeds/HD2008.zip
 python -I src/build_persons.py build/corpus.db
 python -I src/stats.py build/corpus.db build/stats.json
 python -I src/export.py build/corpus.db build/export

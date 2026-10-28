@@ -1,13 +1,14 @@
 """Add IPEDS sector, level and Carnegie class to institutions; match leftover affiliations to IPEDS by name.
 
-Usage: python -I src/enrich_ipeds.py <db_path> <HD2023.zip> <wikidata_ror_ipeds.csv>
+Usage: python -I src/enrich_ipeds.py <db_path> <HD2023.zip[,HD2008.zip]> <wikidata_ror_ipeds.csv> [affiliation_aliases_ipeds.csv]
 
 two_year = 1 when IPEDS ICLEVEL is 2 (two-year) or the 2021 Carnegie Basic class is 1-14
 (associate's colleges, special-focus two-year, and baccalaureate/associate's colleges that
 mostly grant associate's degrees). That keeps community colleges that now offer a few
-bachelor's degrees in the two-year count.
+bachelor's degrees in the two-year count. Colleges found only in HD2008 (closed or merged
+since) use the 2005 Carnegie class, whose associate's categories are also 1-14.
 """
-import csv, io, re, sqlite3, sys, zipfile
+import csv, io, os, re, sqlite3, sys, zipfile
 
 def norm(s):
     s = s.lower().replace("&", "and")
@@ -15,29 +16,44 @@ def norm(s):
     s = re.sub(r"[^a-z0-9 ]+", " ", s)
     return re.sub(r"\s+", " ", s).strip()
 
-def main(db_path, hd_zip, wd_csv):
+def load_hd(hd_zips):
+    """UNITID -> HD row, and normalized name -> UNITIDs. hd_zips is a comma-separated list,
+    newest first; an older file only adds institutions the newer ones lack (closed or merged
+    colleges) and the names they used then."""
+    hd, by_name = {}, {}
+    for path in hd_zips.split(","):
+        z = zipfile.ZipFile(path)
+        with z.open(z.namelist()[0]) as f:
+            for r in csv.DictReader(io.TextIOWrapper(f, encoding="latin-1")):
+                r = {k.replace("ï»¿", "").replace("﻿", "").strip().upper(): v for k, v in r.items()}  # HD2023 starts with a BOM
+                hd.setdefault(r["UNITID"], r)
+                ids = by_name.setdefault(norm(r["INSTNM"]), [])
+                if r["UNITID"] not in ids:
+                    ids.append(r["UNITID"])
+    return hd, by_name
+
+def fill_ipeds(con, hd, inst_id, unitid):
+    r = hd.get(unitid)
+    if not r:
+        return False
+    # C21BASIC (2021 Carnegie) in HD2023; CCBASIC (2005 Carnegie) in HD2008. Both put
+    # associate's colleges at 1-14.
+    lvl, basic = int(r["ICLEVEL"] or 0), int(r.get("C21BASIC") or r.get("CCBASIC") or 0)
+    basic = max(basic, 0)
+    two = 1 if lvl == 2 or 1 <= basic <= 14 else 0
+    con.execute("UPDATE institution SET ipeds_unitid=?, sector=?, iclevel=?, two_year=?, carnegie_basic=? WHERE id=?",
+                (unitid, int(r["SECTOR"] or 0), lvl, two, basic, inst_id))
+    return True
+
+def main(db_path, hd_zip, wd_csv, alias_csv=None):
     con = sqlite3.connect(db_path)
-    z = zipfile.ZipFile(hd_zip)
-    hd = {}
-    by_name = {}
-    with z.open(z.namelist()[0]) as f:
-        for r in csv.DictReader(io.TextIOWrapper(f, encoding="latin-1")):
-            r = {k.replace("ï»¿", "").replace("﻿", "").strip().upper(): v for k, v in r.items()}  # file starts with a BOM
-            hd[r["UNITID"]] = r
-            by_name.setdefault(norm(r["INSTNM"]), []).append(r["UNITID"])
+    hd, by_name = load_hd(hd_zip)
     ror2ipeds = {}
     for r in csv.DictReader(open(wd_csv, encoding="utf-8")):
         ror2ipeds.setdefault(r["ror"], r["ipeds"])
 
     def fill(inst_id, unitid):
-        r = hd.get(unitid)
-        if not r:
-            return False
-        lvl, basic = int(r["ICLEVEL"] or 0), int(r["C21BASIC"] or 0)
-        two = 1 if lvl == 2 or 1 <= basic <= 14 else 0
-        con.execute("UPDATE institution SET ipeds_unitid=?, sector=?, iclevel=?, two_year=?, carnegie_basic=? WHERE id=?",
-                    (unitid, int(r["SECTOR"] or 0), lvl, two, basic, inst_id))
-        return True
+        return fill_ipeds(con, hd, inst_id, unitid)
 
     via_ror = 0
     for inst_id, ror in con.execute("select id, ror_id from institution where ror_id is not null").fetchall():
@@ -61,15 +77,37 @@ def main(db_path, hd_zip, wd_csv):
         hits = by_name.get(norm(aff), [])
         if len(hits) == 1:
             u = hits[0]
-            iid = "ipeds:" + u
-            con.execute("INSERT OR IGNORE INTO institution(id, name, ipeds_unitid, country, kind) VALUES (?,?,?,?,?)",
-                        (iid, hd[u]["INSTNM"], u, "US", "education"))
-            fill(iid, u)
+            # Reuse the ROR-backed row when one already carries this UNITID.
+            have = con.execute("SELECT id FROM institution WHERE ipeds_unitid=? ORDER BY id LIKE 'ror:%' DESC", (u,)).fetchone()
+            iid = have[0] if have else "ipeds:" + u
+            if not have:
+                con.execute("INSERT INTO institution(id, name, ipeds_unitid, country, kind) VALUES (?,?,?,?,?)",
+                            (iid, hd[u]["INSTNM"], u, "US", "education"))
+                fill(iid, u)
             con.execute("UPDATE affiliation_match SET institution_id=?, method='ipeds-exact-name' WHERE affiliation_as_printed=?", (iid, aff))
             via_name += 1
+    # Curated printed-string -> IPEDS institution aliases (renamed, merged or closed colleges
+    # that ROR does not model), resolved by exact IPEDS name within a state.
+    via_alias, unresolved = 0, []
+    if alias_csv and os.path.exists(alias_csv):
+        for row in csv.DictReader(open(alias_csv, encoding="utf-8")):
+            hits = [u for u in by_name.get(norm(row["ipeds_name"]), []) if hd[u]["STABBR"] == row["state"]]
+            if len(hits) != 1:
+                unresolved.append((row["affiliation"], row["ipeds_name"], len(hits))); continue
+            u = hits[0]
+            have = con.execute("SELECT id FROM institution WHERE ipeds_unitid=? ORDER BY id LIKE 'ror:%' DESC", (u,)).fetchone()
+            iid = have[0] if have else "ipeds:" + u
+            if not have:
+                con.execute("INSERT INTO institution(id, name, ipeds_unitid, country, kind) VALUES (?,?,?,?,?)",
+                            (iid, hd[u]["INSTNM"], u, "US", "education"))
+                fill(iid, u)
+            cur = con.execute("UPDATE affiliation_match SET institution_id=?, method='ipeds-alias' WHERE affiliation_as_printed=?", (iid, row["affiliation"]))
+            via_alias += cur.rowcount
     con.execute("UPDATE appearance SET institution_id = (SELECT institution_id FROM affiliation_match m WHERE m.affiliation_as_printed = appearance.affiliation_as_printed)")
     con.commit()
-    print(f"IPEDS via ROR->Wikidata: {via_ror}; leftover strings matched by exact IPEDS name: {via_name}")
+    print(f"IPEDS via ROR->Wikidata: {via_ror}; leftover strings matched by exact IPEDS name: {via_name}; IPEDS aliases applied: {via_alias}")
+    for u in unresolved:
+        print("   unresolved IPEDS alias:", u)
 
 if __name__ == "__main__":
-    main(*sys.argv[1:4])
+    main(*sys.argv[1:5])

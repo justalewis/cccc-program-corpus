@@ -1,4 +1,4 @@
-"""First-pass person clustering for the eShow years.
+"""First-pass person clustering across all parsed years.
 
 Usage: python -I src/build_persons.py <db_path>
 Within a year, one eShow person key is one person. Across years, people are joined only on
@@ -6,12 +6,17 @@ an exact normalized name (case, periods, extra spaces and accents folded). Clust
 appearances name more than one institution are marked method='exact-name;review' because
 that is where a career move and a namesake look the same. No fuzzy merging here.
 """
-import re, sqlite3, sys, unicodedata
+import hashlib, re, sqlite3, sys, unicodedata
 
 def norm(name):
     s = unicodedata.normalize("NFKD", name)
     s = "".join(ch for ch in s if not unicodedata.combining(ch)).lower().replace(".", " ")
     return re.sub(r"\s+", " ", s).strip()
+
+def slug(name):
+    """Cluster key: the folded name with punctuation dropped, so O'Brien and OBrien join."""
+    key = norm(name)
+    return re.sub(r"[^a-z0-9]+", "-", key).strip("-") or "h" + hashlib.sha1(key.encode()).hexdigest()[:10]
 
 def main(db_path):
     sys.stdout.reconfigure(encoding="utf-8")
@@ -20,10 +25,10 @@ def main(db_path):
     rows = con.execute("select a.id, a.name_as_printed, a.institution_id from appearance a").fetchall()
     clusters = {}
     for aid, name, inst in rows:
-        clusters.setdefault(norm(name), []).append((aid, name, inst))
+        clusters.setdefault(slug(name), []).append((aid, name, inst))
     review = 0
     for key, apps in clusters.items():
-        pid = "p:" + re.sub(r"[^a-z0-9]+", "-", key).strip("-")
+        pid = "p:" + key
         insts = {i for _, _, i in apps if i}
         method = "exact-name" + (";review" if len(insts) > 1 else "")
         review += len(insts) > 1
@@ -37,7 +42,7 @@ def main(db_path):
     for y in years:
         ppl = {p for (p,) in con.execute("select distinct a.person_id from appearance a join session s on s.id=a.session_id where s.year=?", (y,))}
         if seen:
-            print(f"{y}: {len(ppl)} people; {len(ppl & seen)} listed in an earlier eShow year ({len(ppl & seen) / len(ppl):.0%})")
+            print(f"{y}: {len(ppl)} people; {len(ppl & seen)} listed in an earlier year ({len(ppl & seen) / len(ppl):.0%})")
         seen |= ppl
 
 if __name__ == "__main__":

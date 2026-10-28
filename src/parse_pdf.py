@@ -49,6 +49,8 @@ NOISE = re.compile(r"(\.indd\b|^\d{1,2}/\d{1,2}/\d{2,4}\s+\d|^CCCC CONVENTION|^\
 SUFFIX = re.compile(r"^(Jr\.?|Sr\.?|II|III|IV)$")
 QUOTES_OPEN, QUOTES_CLOSE = "“", "”"
 
+LIGATURES = {"ﬀ": "ff", "ﬁ": "fi", "ﬂ": "fl", "ﬃ": "ffi", "ﬄ": "ffl"}
+
 def lines_of(pdf_path):
     """Yield (page_no, bbox, text, size) for every text line, in reading order per page."""
     doc = pymupdf.open(pdf_path)
@@ -58,6 +60,8 @@ def lines_of(pdf_path):
             for line in block.get("lines", []):
                 text = "".join(s["text"] for s in line["spans"]).replace(" ", " ").replace("\t", " ")
                 text = re.sub(r"\s+", " ", text).strip()
+                # Some programs set "fi"/"fl" as ligatures followed by a stray space ("Sheffi eld").
+                text = re.sub("([ﬀ-ﬄ]) ?", lambda m: LIGATURES[m.group(1)], text)
                 if text:
                     size = max((s["size"] for s in line["spans"] if s["text"].strip()), default=0)
                     yield pno, tuple(round(v, 1) for v in line["bbox"]), text, round(size, 1)
