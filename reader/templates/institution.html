@@ -13,7 +13,7 @@
 <ul class="plain cols">{% for p in people %}<li><a href="/person/{{ p.person_id }}">{{ p.display_name }}</a> <span class="small">{{ p.first_year }}–{{ p.last_year }}</span></li>{% endfor %}</ul>
 <h2>Recent sessions</h2>
 <ul>{% for s in sess %}<li>{{ s.year }} · <a href="/session/{{ s.id }}">{{ s.title or s.code }}</a></li>{% endfor %}</ul>
-<script src="/static/chart.umd.min.js"></script>
+<script src="/static/chart.umd.min.js"></script><script src="/static/chart-defaults.js"></script>
 <script>
 const rows = {{ by_year|map(attribute='year')|list|tojson }}, vals = {{ by_year|map(attribute='appearances')|list|tojson }}, ppl = {{ by_year|map(attribute='people')|list|tojson }};
 new Chart(document.getElementById("c"), {type: "bar", data: {labels: rows, datasets: [{label: "Listings", data: vals, backgroundColor: "#a0522d"}, {label: "People", data: ppl, backgroundColor: "#4f6f8f"}]},

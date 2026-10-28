@@ -19,7 +19,7 @@
 <td class="n">{{ r.sessions|num }}</td><td class="n">{{ r.people|num }}</td><td class="n">{{ r.newcomer_share|pct(0) }}</td><td class="n">{{ r.two_year_share|pct }}</td><td class="n">{{ r.public_share|pct(0) }}</td><td class="n">{{ r.non_us_share|pct }}</td><td class="n">{{ r.top10_share|pct(0) }}</td></tr>{% endfor %}
 </tbody></table></div>
 <p class="small">“First listed” counts people whose first listing in this corpus is that year. For 1999 and 2004 it is inflated by the gaps before them, and names are joined only on an exact match plus reviewed pairs.</p>
-<script src="/static/chart.umd.min.js"></script>
+<script src="/static/chart.umd.min.js"></script><script src="/static/chart-defaults.js"></script>
 <script>
 const D = {{ data|safe }};
 const yrs = []; for (let y = 1998; y <= 2027; y++) yrs.push(y);

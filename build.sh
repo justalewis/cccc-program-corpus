@@ -10,6 +10,7 @@ python -I src/extract_pdfs.py "$CAPTURE" build/pdf
 python -I src/parse_pdf.py build/pdf build/corpus.db
 python -I src/parse_html_1990s.py "$CAPTURE" build/corpus.db
 python -I src/merge_pdf_titles.py build/corpus.db 2024 2025 2026
+python -I src/clean_titles.py build/corpus.db
 python -I src/parse_areas.py build/pdf build/corpus.db data/area_crosswalk.csv
 python -I src/build_groups.py build/corpus.db data/group_aliases.csv
 python -I src/match_ror.py build/corpus.db data/ror_cache.jsonl

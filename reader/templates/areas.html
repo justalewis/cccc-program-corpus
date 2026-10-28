@@ -12,7 +12,7 @@
 <div class="tbl"><table><thead><tr><th>Family</th>{% for y in years %}<th>{{ y }}</th>{% endfor %}</tr></thead><tbody>
 {% for g in order %}<tr><td><a href="/area/{{ g|urlencode }}">{{ g }}</a></td>{% for y in years %}<td class="small">{% for a, n in groups[g].get(y, []) %}{{ a }} ({{ n }}){% if not loop.last %}<br>{% endif %}{% endfor %}</td>{% endfor %}</tr>{% endfor %}
 </tbody></table></div>
-<script src="/static/chart.umd.min.js"></script>
+<script src="/static/chart.umd.min.js"></script><script src="/static/chart-defaults.js"></script>
 <script>
 const D = {{ data|safe }};
 const yrs = D.years;

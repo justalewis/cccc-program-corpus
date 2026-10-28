@@ -13,4 +13,5 @@
 </div></header>
 <main id="main">{% block main %}{% endblock %}</main>
 <footer>Counts are people <b>listed in the program</b>, not attendees. Data built {{ build_date }}. <a href="/how-to-read">How to read</a> · <a href="{{ data_url }}">Query the data</a> · <a href="{{ repo_url }}">Code and issues</a></footer>
+<script>document.querySelectorAll("th").forEach(function (t) { if (!t.getAttribute("scope")) t.setAttribute("scope", t.closest("thead") ? "col" : "row"); });</script>
 </body></html>

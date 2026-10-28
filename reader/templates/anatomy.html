@@ -12,7 +12,7 @@
 <div class="tbl"><table><thead><tr><th>Year</th>{% for f in formats %}<th class="n">{{ f }}</th>{% endfor %}<th class="n">People per concurrent session</th></tr></thead><tbody>
 {% for y in years %}<tr><td><a href="/year/{{ y }}">{{ y }}</a></td>{% for f in formats %}<td class="n">{{ counts[y].get(f, 0) }}</td>{% endfor %}<td class="n">{% if sizes.get(y) %}{{ sizes[y][0] }} (median {{ sizes[y][1] }}){% endif %}</td></tr>{% endfor %}
 </tbody></table></div>
-<script src="/static/chart.umd.min.js"></script>
+<script src="/static/chart.umd.min.js"></script><script src="/static/chart-defaults.js"></script>
 <script>
 const D = {{ data|safe }}, yrs = D.years;
 const pal = ["#a0522d", "#c9a27a", "#4f6f8f", "#6b8f4f", "#8a6fb0", "#c08a2a", "#3d7f7f", "#888888"];

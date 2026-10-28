@@ -15,7 +15,7 @@
 <tr><th>All years</th><th class="n"></th>{% for s in series %}<th class="n"><a href="/titles?term={{ s.term|urlencode }}&scope={{ scope }}">{{ s.total|num }}</a></th>{% endfor %}</tr>
 </tbody></table></div>
 <div class="caveat">A word in a title is not the concept it names. Open the matching titles before drawing a conclusion: the earliest use of “translingual” in these programs (2007) is a paper about Civil War soldiers' letters, and the field's sense of the word starts in 2011.</div>
-<script src="/static/chart.umd.min.js"></script>
+<script src="/static/chart.umd.min.js"></script><script src="/static/chart-defaults.js"></script>
 <script>
 const D = {{ data|safe }};
 const yrs = D.years; const colors = ["#a0522d", "#4f6f8f", "#6b8f4f", "#8a6fb0", "#c08a2a", "#555"];

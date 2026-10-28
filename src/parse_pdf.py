@@ -111,6 +111,8 @@ def parse_entry(text):
     if m:
         title = m.group(1).strip().rstrip("”\"").strip()
         text = text[:m.start()].strip().rstrip(",").strip()
+        if len(title) > 260:  # an opening quote with no close: the "title" swallowed the prose after it
+            title = None
     parts = [p.strip() for p in text.split(",") if p.strip()]
     if not parts:
         return None

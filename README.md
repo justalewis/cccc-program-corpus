@@ -109,6 +109,10 @@ Public view: https://cccc-program-corpus.fly.dev (Datasette over the release dat
 
 All five open straight from the file in an ordinary browser.
 
+## Tests
+
+`python -m pytest tests` (needs `build/reader.db`). The reader tests check that every page loads and is marked noindex, that person pages exist only for people listed at two or more conventions, that suppressed people have no page, that network views respect their thresholds, that no private column (descriptions, eShow keys, call text) is in the database or exports, and that title matching uses word boundaries. The unit tests cover the splitter, the name matcher, group names, area cleaning and the Pinakes author key, and guard against a backspace character sneaking into source through a shell heredoc.
+
 ## Planning notes
 
 - `docs/tools-and-interface.md`: what the data can support (28 tools) and an interface sketch.
