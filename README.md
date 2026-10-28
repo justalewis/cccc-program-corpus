@@ -61,6 +61,8 @@ src/enrich_ipeds.py      ROR -> Wikidata (P1771) -> IPEDS HD2023 (HD2008 for clo
 src/strip_places.py      "Old Dominion University, Norfolk, VA" -> the institution, when the dropped place is its own
 src/build_persons.py     exact normalized name across all years; sorts multi-institution names into moves and review; applies data/person_decisions*.csv and data/name_merges*.csv
 src/stats.py             per-year summary -> build/stats.json
+src/review_crosswalk.py  the area headings and their draft families, as a decision page -> build/review/crosswalk.html
+src/parse_areas.py       the proposal area above each session in the PDF programs -> session.area, area_group (data/area_crosswalk.csv)
 src/review_people.py     the names still marked review, as a decision page -> build/review/people.html
 src/near_names.py        pairs of names that differ by a middle initial, nickname, surname part or one letter and share an institution -> build/review/near-names.html
 src/review_sample.py     40 random PDF sessions beside their page images -> build/review/index.html (private: NCTE's pages; run by hand)
@@ -83,7 +85,9 @@ Public view: https://cccc-program-corpus.fly.dev (Datasette over the release dat
 - `build/review/people.html`: the 318 names that appear at two institutions in the same year, or return to an earlier one. Choose same person, different people or not sure, then download `person_decisions.csv` into `data/` and rebuild. "Different" splits the name into one person per institution.
 - `build/review/near-names.html`: about 1,600 pairs of names that are probably one person printed two ways (a middle initial, a nickname, part of a hyphenated surname, or one letter), sharing an institution. Each group has a button to mark all its undecided pairs as the same person. Download `name_merges.csv` into `data/` and rebuild.
 
-All three open straight from the file in an ordinary browser.
+- `build/review/crosswalk.html`: the 51 area headings CCCC used, each with the family my draft puts it in (15 families). Change a family, add one, or give a heading a different family in a given year. Download `area_crosswalk.csv` over `data/area_crosswalk.csv` and rebuild.
+
+All four open straight from the file in an ordinary browser.
 
 ## Planning notes
 
