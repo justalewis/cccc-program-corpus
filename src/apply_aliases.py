@@ -22,6 +22,7 @@ def display(org):
     return next((n["value"] for n in org["names"] if "ror_display" in n["types"]), org["names"][0]["value"])
 
 def main(db_path, aliases_csv, cache_path):
+    sys.stdout.reconfigure(encoding="utf-8")
     con = sqlite3.connect(db_path)
     cache = {}
     if os.path.exists(cache_path):

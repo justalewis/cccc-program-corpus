@@ -14,6 +14,7 @@ def norm(name):
     return re.sub(r"\s+", " ", s).strip()
 
 def main(db_path):
+    sys.stdout.reconfigure(encoding="utf-8")
     con = sqlite3.connect(db_path)
     con.execute("DELETE FROM person")
     rows = con.execute("select a.id, a.name_as_printed, a.institution_id from appearance a").fetchall()

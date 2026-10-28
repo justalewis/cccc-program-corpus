@@ -2,7 +2,7 @@
 
 Usage: python -I src/parse_details.py <capture_dir> <db_path>
 For each captured getDetails response: stores the session description, and uses the
-detail view's separate name and company fields to correct the listing's comma split
+detail view's separate name and company fields where they differ from the listing's comma split
 (matched on the eShow person key within the session).
 """
 import glob, os, re, sqlite3, sys
@@ -14,6 +14,9 @@ PERSON = re.compile(r"getSpeakerDetails\('([0-9A-F-]{36})'\)")
 
 def clean(s):
     return re.sub(r"\s+", " ", (s or "").replace("\xa0", " ")).strip()
+
+def squash(s):
+    return re.sub(r"[\s,]+", "", s or "").lower()
 
 def pairs(capture_dir):
     """Yield (session_key, response_html) from the details WARC(s)."""
@@ -44,17 +47,22 @@ def main(capture_dir, db_path):
         if desc:
             con.execute("UPDATE session SET description=? WHERE eshow_key=?", (desc, key)); n_desc += 1
         for item in soup.select("div.speaker-flex-item"):
-            nm = item.find("div", class_="speaker-info-name")
+            # From 2026 on the role label ("Presenter") uses the same class and comes first.
+            names = item.find_all("div", class_="speaker-info-name")
+            nm = names[-1] if names else None
             co = item.find("div", class_="speaker-info-company")
             a = item.find("a", onclick=PERSON)
             if not (nm and a):
                 continue
             pk = PERSON.search(a["onclick"]).group(1)
-            cur = con.execute("""UPDATE appearance SET name_as_printed=?, affiliation_as_printed=?
-                                 WHERE eshow_person_key=? AND session_id=? AND (name_as_printed<>? OR coalesce(affiliation_as_printed,'')<>?)""",
-                              (clean(nm.get_text()), clean(co.get_text()) if co else None, pk, "eshow:" + key,
-                               clean(nm.get_text()), clean(co.get_text()) if co else ""))
-            n_fix += cur.rowcount
+            name, comp = clean(nm.get_text()), clean(co.get_text()) if co else None
+            row = con.execute("SELECT id, name_as_printed, affiliation_as_printed FROM appearance WHERE eshow_person_key=? AND session_id=?",
+                              (pk, "eshow:" + key)).fetchone()
+            # The listing split is right almost every time; only take the detail view's
+            # fields when they differ by more than spacing and commas.
+            if row and (squash(row[1]) != squash(name) or squash(row[2]) != squash(comp)):
+                con.execute("UPDATE appearance SET name_as_printed=?, affiliation_as_printed=? WHERE id=?", (name, comp, row[0]))
+                n_fix += 1
     con.commit()
     print(f"detail responses: {n}; descriptions stored: {n_desc}; name/affiliation splits corrected: {n_fix}")
 

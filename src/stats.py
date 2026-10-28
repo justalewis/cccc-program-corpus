@@ -20,6 +20,7 @@ Q = {
 }
 
 def main(db_path, out):
+    sys.stdout.reconfigure(encoding="utf-8")
     con = sqlite3.connect(db_path)
     years = [y for (y,) in con.execute("select distinct year from session order by year")]
     res = {}

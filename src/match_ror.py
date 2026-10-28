@@ -26,6 +26,7 @@ def name_of(org):
     return org.get("names", [{}])[0].get("value")
 
 def main(db_path, cache_path):
+    sys.stdout.reconfigure(encoding="utf-8")
     con = sqlite3.connect(db_path)
     affs = [a for (a,) in con.execute("select distinct affiliation_as_printed from appearance where affiliation_as_printed is not null")]
     cache = load_cache(cache_path)
