@@ -6,7 +6,7 @@ Build plan and year-by-year inventory: https://claude.ai/artifact/ATiTrR28yzNNj3
 
 ## Status (28 October 2026)
 
-The eShow listings for 2024–2027, the born-digital PDF programs for 2004–2023, and the 1998 and 1999 programs from the Wayback Machine, in one database: 16,064 sessions, 63,325 appearances, and 20,637 names after exact-name clustering. 1994–1997 survive online only as front pages with no program, and 2000–2003 not at all.
+The eShow listings for 2024–2027, the born-digital PDF programs for 2004–2023, and the 1998 and 1999 programs from the Wayback Machine, in one database: 16,166 sessions, 63,791 appearances, and 20,715 names after exact-name clustering. 1994–1997 survive online only as front pages with no program, and 2000–2003 not at all.
 
 | Year | Source | Sessions | Listed people | Affiliation matched | Two-year people | Two-year share* |
 |---|---|---|---|---|---|---|
@@ -16,7 +16,7 @@ The eShow listings for 2024–2027, the born-digital PDF programs for 2004–202
 | 2005 San Francisco | PDF | 536 | 2,048 | 96% | 192 | 10.2% |
 | 2006 Chicago | PDF | 588 | 2,205 | 96% | 151 | 7.4% |
 | 2007 New York | PDF | 627 | 2,215 | 97% | 172 | 8.5% |
-| 2008 New Orleans | PDF | 489 | 1,782 | 96% | 140 | 8.7% |
+| 2008 New Orleans | PDF | 591 | 2,122 | 96% | 161 | 8.4% |
 | 2009 San Francisco | PDF | 662 | 2,264 | 96% | 183 | 9.0% |
 | 2010 Louisville | PDF | 670 | 2,333 | 97% | 132 | 6.0% |
 | 2011 Atlanta | PDF | 587 | 2,042 | 97% | 93 | 4.9% |
@@ -59,11 +59,13 @@ src/match_ror.py         ROR v2 affiliation endpoint; accepts ROR's "chosen" mat
 src/apply_aliases.py     data/affiliation_aliases.csv -> ROR by exact name, country and city
 src/enrich_ipeds.py      ROR -> Wikidata (P1771) -> IPEDS HD2023 (HD2008 for closed or merged colleges); data/affiliation_aliases_ipeds.csv
 src/strip_places.py      "Old Dominion University, Norfolk, VA" -> the institution, when the dropped place is its own
-src/build_persons.py     exact normalized name across all years; sorts multi-institution names into moves and review; applies data/person_decisions*.csv
+src/build_persons.py     exact normalized name across all years; sorts multi-institution names into moves and review; applies data/person_decisions*.csv and data/name_merges*.csv
 src/stats.py             per-year summary -> build/stats.json
 src/review_people.py     the names still marked review, as a decision page -> build/review/people.html
+src/near_names.py        pairs of names that differ by a middle initial, nickname, surname part or one letter and share an institution -> build/review/near-names.html
 src/review_sample.py     40 random PDF sessions beside their page images -> build/review/index.html (private: NCTE's pages; run by hand)
 src/export.py            CSVs (descriptions left out) -> build/export/
+src/release.py           release package for deposit: CSVs, SQLite, data dictionary, CITATION.cff, zenodo.json draft (run by hand; uploads nothing)
 metadata.yml             Datasette metadata with the counting caveats
 ```
 
@@ -74,17 +76,23 @@ To browse locally: `datasette build/corpus.db -m metadata.yml`
 ## Reviewing
 
 - `build/review/index.html`: 40 random PDF sessions beside the program page. Tick what's wrong and download the CSV.
-- `build/review/people.html`: the 317 names that appear at two institutions in the same year, or return to an earlier one. Choose same person, different people or not sure, then download `person_decisions.csv` into `data/` and rebuild. "Different" splits the name into one person per institution.
+- `build/review/people.html`: the 318 names that appear at two institutions in the same year, or return to an earlier one. Choose same person, different people or not sure, then download `person_decisions.csv` into `data/` and rebuild. "Different" splits the name into one person per institution.
+- `build/review/near-names.html`: about 1,600 pairs of names that are probably one person printed two ways (a middle initial, a nickname, part of a hyphenated surname, or one letter), sharing an institution. Each group has a button to mark all its undecided pairs as the same person. Download `name_merges.csv` into `data/` and rebuild.
 
-Both open straight from the file in an ordinary browser.
+All three open straight from the file in an ordinary browser.
+
+## Planning notes
+
+- `docs/tools-and-interface.md`: what the data can support (28 tools) and an interface sketch.
+- `docs/deploy.md`: the deploy recommendation (private Datasette on Fly.io first, Pinakes later).
+- Release: `python -I src/release.py build/corpus.db build/stats.json build/release v0.1.0-draft`. Fields marked [TO DECIDE] (license, ORCID, NCTE statement, DOI, contact) need deciding before deposit.
 
 ## Known limits
 
-- People are joined across years only on an exact name. Of the names at more than one institution, 3,555 move from one to the next without overlap or return and are taken as one person changing jobs; 317 wait on `people.html`. Nothing fuzzy has been merged.
+- People are joined across years only on an exact name. Of the names at more than one institution, 3,570 move from one to the next without overlap or return and are taken as one person changing jobs; 318 wait on `people.html`. Nothing fuzzy has been merged.
 - About 4% of appearances with an affiliation have no matched institution: independent scholars, schools, publishers, and a long tail. `affiliation_matches` keeps ROR's top guess for each, and the ones refused for sharing no word with the string are marked `ror-chosen-refused`.
 - PDF years: where the program ran two presenters into one entry, the parser splits it at a common first name (from `data/first_names.txt`) that ends a comma segment and has an institution after it. That catches the 2009 "A, Univ X, and B, Univ Y" pattern and most others; a second person with no institution after the name stays merged. Affiliations in 2004–2018 carry the city and state as printed.
 - 1994–1997: the archived pages hold no program. The 1994 "presenter index" lists about a dozen papers posted online, the 1996 site links to session pages that were never captured, and 1995 and 1997 have only a front page.
 - 1998: sections A and J are cut short in the captured pages. 1999: sections E, F, K and M have titles only.
-- 2008 has no Saturday file in the capture, so its counts are short.
 - eShow person keys are per year (no key appears in two years).
 - Session descriptions are NCTE's text and stay out of the exports until NCTE agrees.

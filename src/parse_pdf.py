@@ -17,7 +17,7 @@ SOURCES = {
     2005: ["2005__2005completeprogram.pdf"],
     2006: ["2006__2006programwednesday.pdf", "2006__2006programthursday.pdf", "2006__2006programfriday.pdf", "2006__2006programsaturday.pdf"],
     2007: ["2007__2007completeprogram.pdf"],
-    2008: ["2008__2008programwednesday.pdf", "2008__2008programthursday.pdf", "2008__2008programfriday.pdf"],
+    2008: ["2008__2008completeprogram.pdf"],  # found live 28 Oct 2026; the day files lacked Saturday
     2009: ["2009__2009completeprogram.pdf"],
     2010: ["2010__cccc2010-program.pdf"],
     2011: ["2011__program__entire-prog.pdf"],

@@ -1,6 +1,6 @@
 """Person clustering across all parsed years.
 
-Usage: python -I src/build_persons.py <db_path> ["data/person_decisions*.csv"]
+Usage: python -I src/build_persons.py <db_path> ["data/person_decisions*.csv"] ["data/name_merges*.csv"]
 People are joined only on an exact normalized name (case, periods, extra spaces and accents
 folded). No fuzzy merging. A cluster whose appearances name one institution, or none, is
 method 'exact-name'. One that names several is sorted by its year-by-year pattern:
@@ -14,6 +14,8 @@ Each person_decisions*.csv file (person_id, decision, note) records a reviewer's
 'same' keeps it whole ('exact-name;reviewed-same'); 'different' splits it into one person
 per institution ('exact-name;reviewed-split'), with institution-less appearances left on
 the original id; anything else leaves it as it was.
+Each name_merges*.csv file (a, b, decision, note), from the near-name page, joins two clusters
+marked 'same' before any of the above; the result is method 'near-name-reviewed[;...]'.
 """
 import csv, glob, hashlib, re, sqlite3, sys, unicodedata
 
@@ -49,7 +51,29 @@ def pattern(apps):
                 return "review"
     return "moves"
 
-def main(db_path, decisions_csv=None):
+def apply_merges(clusters, merges_csv):
+    """Join clusters a reviewer marked as one person on the near-name page (name_merges*.csv:
+    a, b, decision). Returns the keys that absorbed another cluster. The merged cluster keeps
+    the key of whichever part has more appearances."""
+    parent = {}
+    def find(k):
+        while parent.get(k, k) != k:
+            k = parent[k]
+        return k
+    for path in sorted(glob.glob(merges_csv)) if merges_csv else []:
+        for r in csv.DictReader(open(path, encoding="utf-8-sig")):
+            a, b = r["a"].removeprefix("p:"), r["b"].removeprefix("p:")
+            if r["decision"].strip().lower() != "same" or "~" in a + b or a not in clusters or b not in clusters:
+                continue  # split ids and names no longer in the corpus are skipped
+            ra, rb = find(a), find(b)
+            if ra != rb:
+                if len(clusters[ra]) < len(clusters[rb]):
+                    ra, rb = rb, ra
+                parent[rb] = ra
+                clusters[ra].extend(clusters.pop(rb))
+    return {find(k) for k in parent}
+
+def main(db_path, decisions_csv=None, merges_csv=None):
     sys.stdout.reconfigure(encoding="utf-8")
     con = sqlite3.connect(db_path)
     con.execute("DELETE FROM person")
@@ -64,9 +88,12 @@ def main(db_path, decisions_csv=None):
         clusters.setdefault(slug(name), []).append((aid, name, inst, year))
         if inst_name and SYSTEM.search(inst_name):
             system.add(inst)
+    merged = apply_merges(clusters, merges_csv)
     counts = {"single": 0, "moves": 0, "review": 0, "reviewed-same": 0, "reviewed-split": 0}
 
     def add(pid, apps, method):
+        if pid.split("~")[0][2:] in merged:
+            method = method.replace("exact-name", "near-name-reviewed", 1)
         display = max((n for _, n, _, _ in apps), key=lambda n: sum(1 for _, m, _, _ in apps if m == n))
         con.execute("INSERT INTO person(id, display_name, method) VALUES (?,?,?)", (pid, display, method))
         con.executemany("UPDATE appearance SET person_id=? WHERE id=?", [(pid, aid) for aid, _, _, _ in apps])
@@ -90,6 +117,7 @@ def main(db_path, decisions_csv=None):
             add(pid, apps, "exact-name" if kind == "single" else "exact-name;" + kind)
             counts[kind] += 1
     con.commit()
+    print(f"near-name merges applied: {len(merged)} clusters absorbed others")
     print(f"persons: {len(clusters)} name clusters; one institution: {counts['single']}; "
           f"moves (one institution a year, no returns): {counts['moves']}; review: {counts['review']}; "
           f"reviewed same: {counts['reviewed-same']}; reviewed and split: {counts['reviewed-split']}")
@@ -102,4 +130,4 @@ def main(db_path, decisions_csv=None):
         seen |= ppl
 
 if __name__ == "__main__":
-    main(*sys.argv[1:3])
+    main(*sys.argv[1:4])

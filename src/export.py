@@ -1,4 +1,4 @@
-"""Write CSV exports of the public-safe tables (descriptions left out).
+"""Write CSV exports of the public-safe tables (session descriptions and eShow keys left out).
 
 Usage: python -I src/export.py <db_path> <out_dir>
 """
@@ -6,10 +6,12 @@ import csv, os, sqlite3, sys
 
 TABLES = {
     "conventions": "select * from convention order by year",
-    "sessions": "select id, year, parent_id, code, title, session_type, audience_level, tracks, dates, time_label, room, cancelled from session order by year, code, id",
-    "appearances": """select a.id, s.year, a.session_id, a.ord, a.role, a.name_as_printed, a.affiliation_as_printed, a.person_id, a.institution_id
+    "sessions": "select id, year, source_document_id, parent_id, code, title, session_type, audience_level, tracks, dates, time_label, room, cancelled from session order by year, code, id",
+    "appearances": """select a.id, s.year, a.session_id, a.ord, a.role, a.name_as_printed, a.affiliation_as_printed, a.paper_title,
+                      a.person_id, a.institution_id, a.source_document_id, a.page
                       from appearance a join session s on s.id = a.session_id order by s.year, a.session_id, a.ord""",
-    "people": "select * from person order by id",
+    "people": "select id, display_name, method from person order by id",
+    "source_documents": "select id, year, kind, url, rights from source_document order by year, id",
     "institutions": "select * from institution order by name",
     "affiliation_matches": "select * from affiliation_match order by affiliation_as_printed",
 }
