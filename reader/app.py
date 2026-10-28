@@ -125,6 +125,8 @@ def census_rows():
         d["unmatched_share"] = 1 - d["matched"] / d["with_affiliation"] if d["with_affiliation"] else None
         d["newcomer_share"] = d["newcomers"] / ppl if ppl and d["year"] > 1998 else None
         d["chair_share"] = d["chairs"] / d["appearances"] if d["appearances"] else None
+        c = q1("SELECT theme, chair FROM conventions WHERE year = ?", d["year"])
+        d["theme"], d["chair"] = (c["theme"], c["chair"]) if c else (None, None)
         out.append(d)
     return out
 
@@ -150,6 +152,69 @@ def home():
     return render_template("home.html", rows=rows, metrics=METRICS, breaks=BREAKS,
                            data=json.dumps({"rows": rows, "metrics": METRICS, "breaks": BREAKS}))
 
+# ---- conventions: dates, sites, themes, chairs --------------------------------------------
+
+STOP = set("""about above after again against among because before being between both could does doing during each from further
+have having here into more most other over same should some such than that their them then there these they this those through
+under until very were what when where which while will with would your ours yours the and for are but not you all can had
+her was one our out has him his how its may new now old see two way who why also back down even just like made make many much
+must only then well work works""".split())
+_DF = None
+_ECHO = {}
+
+def word_df():
+    """Share of all titles containing each word, to drop words too common to echo a theme."""
+    global _DF
+    if _DF is None:
+        counts, n = {}, 0
+        for t in titles():
+            n += 1
+            for w in set(re.findall(r"[a-z]{4,}", t[4])):
+                counts[w] = counts.get(w, 0) + 1
+        _DF = {w: c / n for w, c in counts.items()}
+    return _DF
+
+def theme_echo(year, theme):
+    """How often the words of a theme appear in that year's titles, against all other years."""
+    if not theme:
+        return None
+    if year in _ECHO:
+        return _ECHO[year]
+    df = word_df()
+    words = sorted({w for w in re.findall(r"[a-z]{5,}", theme.lower()) if w not in STOP and df.get(w, 0) <= 0.03})
+    out = None
+    if words:
+        rx = re.compile(r"(?<![a-z])(?:" + "|".join(re.escape(w) for w in words) + r")")
+        this = [t for t in titles() if t[0] == year]
+        other = [t for t in titles() if t[0] != year]
+        a = sum(1 for t in this if rx.search(t[4]))
+        b = sum(1 for t in other if rx.search(t[4]))
+        if this:
+            out = {"words": words, "this": a / len(this), "other": b / len(other), "n": a, "titles": len(this)}
+    _ECHO[year] = out
+    return out
+
+def chair_page(name):
+    """A program chair's person page, when they have one (listed at two or more conventions)."""
+    if not name:
+        return None
+    r = q1("SELECT person_id FROM person_summary WHERE display_name = ? AND eligible = 1", name)
+    return r["person_id"] if r else None
+
+@app.route("/conventions")
+def conventions():
+    rows = []
+    in_corpus = {r["year"] for r in q("SELECT year FROM census")}
+    for r in q("SELECT * FROM conventions WHERE year >= 1950 ORDER BY year DESC"):
+        d = dict(r)
+        d["in_corpus"] = d["year"] in in_corpus
+        d["echo"] = theme_echo(d["year"], d["theme"]) if d["in_corpus"] else None
+        d["chair_pid"] = chair_page(d["chair"])
+        rows.append(d)
+    n_theme = sum(1 for r in rows if r["theme"])
+    first_theme = min((r["year"] for r in rows if r["theme"]), default=None)
+    return render_template("conventions.html", rows=rows, n_theme=n_theme, first_theme=first_theme)
+
 # ---- years and sessions ------------------------------------------------------------------
 
 @app.route("/year/<int:y>")
@@ -169,10 +234,12 @@ def year(y):
     roles = q("SELECT role_group, count(*) n FROM appearances WHERE year = ? GROUP BY 1 ORDER BY n DESC", y)
     area_rows = q("SELECT area, area_group, count(*) n FROM sessions WHERE year = ? AND area IS NOT NULL AND parent_id IS NULL GROUP BY 1, 2 ORDER BY n DESC", y)
     formats = json.loads(c["formats"] or "{}")
+    echo = theme_echo(y, conv["theme"]) if conv else None
+    chair_pid = chair_page(conv["chair"]) if conv else None
     prev = q1("SELECT max(year) y FROM census WHERE year < ?", y)["y"]
     nxt = q1("SELECT min(year) y FROM census WHERE year > ?", y)["y"]
     return render_template("year.html", y=y, c=cen, conv=conv, sessions=sessions, top=top, docs=docs, roles=roles, area_rows=area_rows,
-                           formats=sorted(formats.items(), key=lambda t: -t[1]), note=YEAR_NOTES.get(y), prev=prev, next=nxt)
+                           formats=sorted(formats.items(), key=lambda t: -t[1]), note=YEAR_NOTES.get(y), echo=echo, chair_pid=chair_pid, prev=prev, next=nxt)
 
 @app.route("/session/<path:sid>")
 def session(sid):

@@ -39,7 +39,7 @@ function draw() {
   if (chart) chart.destroy();
   chart = new Chart(document.getElementById("c"), {type: "line", plugins: [bands],
     data: {labels: yrs, datasets: [{label: meta[1], data: vals, borderColor: "#a0522d", backgroundColor: "#a0522d", pointRadius: 3, spanGaps: join, tension: 0}]},
-    options: {maintainAspectRatio: false, plugins: {legend: {display: false}, tooltip: {callbacks: {label: c => c.raw == null ? "no data" : (kind === "share" ? (c.raw * 100).toFixed(1) + "%" : kind === "index" ? c.raw.toFixed(3) : c.raw.toLocaleString())}}},
+    options: {maintainAspectRatio: false, plugins: {legend: {display: false}, tooltip: {callbacks: {afterBody: items => { const r = byYear[yrs[items[0].dataIndex]]; return r && r.theme ? ["Theme: " + r.theme].concat(r.chair ? ["Program chair: " + r.chair] : []) : []; }, label: c => c.raw == null ? "no data" : (kind === "share" ? (c.raw * 100).toFixed(1) + "%" : kind === "index" ? c.raw.toFixed(3) : c.raw.toLocaleString())}}},
       scales: {y: {beginAtZero: true, ticks: {callback: v => kind === "share" ? Math.round(v * 100) + "%" : v}}},
       onClick: (e, els) => { if (els.length) location.href = "/year/" + yrs[els[0].index]; }}});
   document.getElementById("note").textContent = D.breaks.map(b => b.label).join(" · ") + ". Click a point to open that year.";

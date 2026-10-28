@@ -37,6 +37,20 @@ def main(src, out):
             theme, rest = t.group(1).strip(), rest[:t.start()].strip()
         rows.append(dict(year=int(m["year"]), dates=m["dates"].replace("\u2013", "-").strip(), site=rest.strip(), theme=theme or "", chair=chair or ""))
     rows.sort(key=lambda r: (r["year"], r["dates"]))
+    # A range that crosses a month ("March 30-April 1, 1978") is split at the second month, so the
+    # first half ends up on the end of the NEXT-LATER entry's chair or theme text. Move it back.
+    tail = re.compile(rf"\s+({MONTH} \d{{1,2}}\S{{0,3}})$")
+    for i in range(len(rows) - 1, 0, -1):
+        for field in ("chair", "theme", "site"):
+            m = tail.search(rows[i][field])
+            if m:
+                rows[i][field] = rows[i][field][:m.start()].strip()
+                rows[i - 1]["dates"] = m.group(1).rstrip("-–") + "-" + rows[i - 1]["dates"]
+    # A theme whose opening quote was lost stays in the site text: "Atlanta, GA The Uses of Literacy..."
+    for r in rows:
+        m = re.match(r"^([A-Z][A-Za-z.' ]+, [A-Z]{2})\s+(.+)$", r["site"])
+        if m and not r["theme"]:
+            r["site"], r["theme"] = m.group(1), m.group(2).strip(" ”\"")
     with open(out, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=["year", "dates", "site", "theme", "chair"])
         w.writeheader(); w.writerows(rows)
