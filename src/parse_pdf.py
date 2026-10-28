@@ -76,7 +76,9 @@ def split_entries(lines):
         if cur is None:
             cur = [pg, bb, t]; continue
         joined = cur[2]
-        if open_quotes(joined) > 0 or joined.endswith((",", "-", "–", "/", "&", " and")) or t.startswith((QUOTES_OPEN, '"', "(")) \
+        # a hanging indent: same page, a few points right of where the entry starts
+        hanging = pg == cur[0] and 3 < bb[0] - cur[1][0] < 30
+        if hanging or open_quotes(joined) > 0 or joined.endswith((",", "-", "–", "/", "&", " and")) or t.startswith((QUOTES_OPEN, '"', "(")) \
            or (t[:1].islower()):
             if joined.endswith("-") and t[:1].islower() and joined[-2:-1].isalpha():
                 joined = joined[:-1]  # a line-break hyphen: "Composi-" + "tion"
@@ -145,7 +147,8 @@ def parse_pdf(path):
         if role and role_size and (abs(size - role_size) > 0.6 or (t.isupper() and len(t) > 12)):
             flush_role(); role = None; cur = None
             continue
-        if CODE.match(nxt) and not ROLE.match(t) and open_quotes(" ".join(x[2] for x in role_lines)) <= 0:
+        # (a person entry nearly always has a comma before the affiliation; a label never does)
+        if CODE.match(nxt) and not ROLE.match(t) and "," not in t and open_quotes(" ".join(x[2] for x in role_lines)) <= 0:
             flush_role(); role = None
             continue
         r = ROLE.match(t)
