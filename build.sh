@@ -20,6 +20,10 @@ python -I src/enrich_more.py build/corpus.db data/themes.csv data/ipeds/HD2023.z
 python -I src/build_persons.py build/corpus.db "data/person_decisions*.csv" "data/name_merges*.csv"
 python -I src/stats.py build/corpus.db build/stats.json
 python -I src/review_people.py build/corpus.db build/review/people.html "data/person_decisions*.csv"
+if [ -f build/links/pinakes_suggestions.csv ]; then
+  python -I src/build_links.py build/corpus.db build/links/pinakes_suggestions.csv "data/link_decisions*.csv"
+  python -I src/review_links.py build/corpus.db build/links/pinakes_suggestions.csv build/review/links.html "data/link_decisions*.csv"
+fi
 python -I src/review_crosswalk.py build/corpus.db build/review/crosswalk.html data/area_crosswalk.csv
 python -I src/near_names.py build/corpus.db build/review/near-names.html "data/name_merges*.csv"
 python -I src/export.py build/corpus.db build/export

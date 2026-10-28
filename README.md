@@ -63,6 +63,9 @@ src/build_persons.py     exact normalized name across all years; sorts multi-ins
 src/stats.py             per-year summary -> build/stats.json
 src/build_groups.py      the special-interest slots (FSIG, TSIG, WSIG) grouped by name -> sgroup, session.group_id (data/group_aliases.csv joins variants)
 src/fetch_themes.py       NCTE past-conventions page -> data/themes.csv (dates, sites, themes, program chairs)
+src/link_pinakes.py      suggested links from convention papers to Pinakes articles -> build/links/pinakes_suggestions.csv (needs a Pinakes dump)
+src/review_links.py      the suggested pairs as a decision page -> build/review/links.html
+src/build_links.py       suggestions plus data/link_decisions*.csv -> the link table
 src/review_crosswalk.py  the area headings and their draft families, as a decision page -> build/review/crosswalk.html
 src/parse_areas.py       the proposal area above each session in the PDF programs -> session.area, area_group (data/area_crosswalk.csv)
 src/review_people.py     the names still marked review, as a decision page -> build/review/people.html
@@ -89,7 +92,9 @@ Public view: https://cccc-program-corpus.fly.dev (Datasette over the release dat
 
 - `build/review/crosswalk.html`: the 51 area headings CCCC used, each with the family my draft puts it in (15 families). Change a family, add one, or give a heading a different family in a given year. Download `area_crosswalk.csv` over `data/area_crosswalk.csv` and rebuild.
 
-All four open straight from the file in an ordinary browser.
+- `build/review/links.html`: 407 pairs of a convention paper and a Pinakes article it may have become (all of tiers B and C, plus a random 150 of tier A to measure precision). Choose Same work, Different or Not sure and download `link_decisions.csv` into `data/`. Made from `build/links/pinakes_suggestions.csv`, which `src/link_pinakes.py` writes from a dump of the Pinakes API.
+
+All five open straight from the file in an ordinary browser.
 
 ## Planning notes
 
