@@ -94,6 +94,7 @@ All four open straight from the file in an ordinary browser.
 ## Planning notes
 
 - `docs/tools-and-interface.md`: what the data can support (28 tools) and an interface sketch.
+- `docs/pinakes-links-plan.md`: linking convention papers to Pinakes articles (pilot: `src/link_pinakes.py`).
 - `docs/deploy.md`: the deploy recommendation (private Datasette on Fly.io first, Pinakes later).
 - Release: `python -I src/release.py build/corpus.db build/stats.json build/release v0.1.0-draft`. Fields marked [TO DECIDE] (license, ORCID, NCTE statement, DOI, contact) need deciding before deposit.
 
