@@ -129,6 +129,10 @@ def main(release_dir, out, capture_dir=None, suppressed_csv=None):
             round(sum(counts[:10]) / tot, 4) if tot else None, round(sum(counts[:50]) / tot, 4) if tot else None,
             gini(counts), len(counts), ro["chair"], ro["respondent"], ro["facilitator"], json.dumps(fm)))
     con.commit()
+    if capture_dir and os.path.isdir(capture_dir):  # derived call-versus-program measures; no call text is stored
+        sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
+        import calls_analysis
+        calls_analysis.build(out, capture_dir)
     con.execute("VACUUM")
     n = con.execute("SELECT count(*) FROM person_summary WHERE eligible = 1").fetchone()[0]
     print(f"reader db -> {out} ({os.path.getsize(out) / 1e6:.1f} MB); {n} people with pages; {len(urls)} NCTE file addresses")

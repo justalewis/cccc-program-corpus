@@ -466,6 +466,19 @@ def network():
     return render_template("network.html", era=era, eras=list(AN.ERAS), net=net, data=json.dumps(net, ensure_ascii=False),
                            teams=AN.teams(db()), bridges=AN.bridges(db()))
 
+# ---- calls for proposals versus programs --------------------------------------------------
+
+@app.route("/calls")
+def calls():
+    if not q1("SELECT name FROM sqlite_master WHERE name = 'call_year'"):
+        abort(404)
+    rows = []
+    for r in q("SELECT c.*, v.theme, v.chair FROM call_year c LEFT JOIN conventions v ON v.year = c.year ORDER BY c.year DESC"):
+        d = dict(r)
+        d["terms"] = q("SELECT * FROM call_term WHERE year = ? ORDER BY rank", d["year"])
+        rows.append(d)
+    return render_template("calls.html", rows=rows)
+
 # ---- term trends -------------------------------------------------------------------------
 
 def trend_series(terms, scope):
