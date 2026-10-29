@@ -90,6 +90,7 @@ def test_titles_table_has_no_long_text(con):
 def test_export_has_no_private_fields(client):
     rows = json.loads(client.get("/export.json?q=assessment&y0=2010&y1=2010").data.decode())["rows"]
     assert rows and not {"description", "eshow_key", "email"} & set(rows[0])
+    assert "CC BY 4.0" in json.loads(client.get("/export.json?q=assessment&y0=2010&y1=2010").data.decode())["corpus"]["license"]
 
 def test_export_csv_has_bom_and_type(client):
     r = client.get("/export.csv?q=assessment&y0=2010&y1=2010")

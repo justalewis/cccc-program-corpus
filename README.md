@@ -109,6 +109,10 @@ Public view: https://cccc-program-corpus.fly.dev (Datasette over the release dat
 
 All five open straight from the file in an ordinary browser.
 
+## License
+
+Code: MIT (`LICENSE`). Data: Creative Commons Attribution 4.0 International, CC BY 4.0 (`DATA-LICENSE.txt`). Credit: Lewis, Justin. *CCCC Convention Program Corpus.* https://github.com/justalewis/cccc-program-corpus. The programs belong to NCTE; the data holds facts printed in them (names, affiliations, titles, session codes) and our matching and groupings, and leaves out NCTE's session descriptions. Corrections: justalewis1@gmail.com.
+
 ## Tests
 
 `python -m pytest tests` (needs `build/reader.db`). The reader tests check that every page loads and is marked noindex, that person pages exist only for people listed at two or more conventions, that suppressed people have no page, that network views respect their thresholds, that no private column (descriptions, eShow keys, call text) is in the database or exports, and that title matching uses word boundaries. The unit tests cover the splitter, the name matcher, group names, area cleaning and the Pinakes author key, and guard against a backspace character sneaking into source through a shell heredoc.
@@ -118,7 +122,7 @@ All five open straight from the file in an ordinary browser.
 - `docs/tools-and-interface.md`: what the data can support (28 tools) and an interface sketch.
 - `docs/pinakes-links-plan.md`: linking convention papers to Pinakes articles (pilot: `src/link_pinakes.py`).
 - `docs/deploy.md`: the deploy recommendation (private Datasette on Fly.io first, Pinakes later).
-- Release: `python -I src/release.py build/corpus.db build/stats.json build/release v0.1.0-draft`. Fields marked [TO DECIDE] (license, ORCID, NCTE statement, DOI, contact) need deciding before deposit.
+- Release: `python -I src/release.py build/corpus.db build/stats.json build/release v0.1.0-draft`. Fields still marked [TO DECIDE] (ORCID, an NCTE statement, the DOI) need Justin before deposit.
 
 ## Known limits
 

@@ -2,7 +2,8 @@ title: CCCC Program Corpus (1998, 1999, 2004–2027)
 description_html: |
   <p>Sessions and listed participants from the CCCC convention programs: the 1998 web program and 1999 PDFs from the Wayback Machine, NCTE's PDF programs for 2004–2023, and eShow listings for 2024–2027, captured in October 2026.</p>
   <p><b>Read before counting.</b> These are people <i>listed in the program</i>, not registrants or attendees. 2027 is a pre-convention listing and will change. People are joined across years on an exact name match, plus pairs a person has reviewed; clusters marked <code>exact-name;review</code> still need checking. Institution matches come from ROR, curated alias lists, and IPEDS; about 3% of appearances that print an affiliation have no matched institution.</p>
-license: "Data: CC0 (facts from the program). Session descriptions are excluded."
+license: "CC BY 4.0"
+license_url: "https://creativecommons.org/licenses/by/4.0/"
 source: "NCTE program PDFs, eShow listings and Wayback Machine replays (private capture)"
 databases:
   corpus:

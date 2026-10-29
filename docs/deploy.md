@@ -51,6 +51,6 @@ The Datasette instance can stay up beside it as the "query the data" view.
 
 ## Still open
 
-- The data license (CC0 or CC BY 4.0) and the code license. Until a license is chosen, the default is all rights reserved.
+- Nothing on licensing: the data is CC BY 4.0 and the code is MIT (chosen 29 October 2026).
 - Whether to notify or ask NCTE.
 - A corrections route. For now the site points to the repository's issues.

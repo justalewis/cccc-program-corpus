@@ -7,7 +7,7 @@ Writes <out_root>/cccc-program-corpus-<version>/ with:
   datapackage.json           Frictionless Data Package: every table and column described
   DATA-DICTIONARY.md         the same descriptions as a readable page
   README.md, CITATION.cff, zenodo.json (deposit metadata draft), SHA256SUMS
-and a zip of that folder beside it. Fields marked [TO DECIDE] need Justin before deposit.
+and a zip of that folder beside it. Fields still marked [TO DECIDE] (ORCID, the NCTE statement, the DOI) need Justin before deposit.
 """
 import csv, hashlib, json, os, shutil, sqlite3, sys, zipfile
 from datetime import date
@@ -16,7 +16,10 @@ from export import TABLES
 
 TITLE = "CCCC Convention Program Corpus"
 AUTHOR = {"name": "Lewis, Justin", "affiliation": "Olympic College", "orcid": "[TO DECIDE: ORCID]"}
-LICENSE = "[TO DECIDE: CC0-1.0 or CC-BY-4.0]"
+LICENSE = "CC-BY-4.0"
+LICENSE_URL = "https://creativecommons.org/licenses/by/4.0/"
+REPO = "https://github.com/justalewis/cccc-program-corpus"
+CONTACT = "justalewis1@gmail.com"
 
 TABLE_DOC = {
     "conventions": "One row per CCCC convention year, 1949–2027, with city and status. Most years before 1998 have no sessions in this release.",
@@ -157,7 +160,7 @@ def main(db_path, stats_path, out_root, version):
     years = sorted(int(y) for y, s in stats.items() if s["sessions"])
     today = date.today().isoformat()
     pkg = {"name": "cccc-program-corpus", "title": TITLE, "version": version, "created": today,
-           "licenses": [{"name": LICENSE}], "contributors": [{"title": AUTHOR["name"], "role": "author"}],
+           "licenses": [{"name": LICENSE, "path": LICENSE_URL, "title": "Creative Commons Attribution 4.0 International"}], "contributors": [{"title": AUTHOR["name"], "role": "author"}],
            "description": "Sessions and listed participants from the programs of the Conference on College Composition and Communication (CCCC), parsed from NCTE's program files.",
            "resources": resources}
     json.dump(pkg, open(os.path.join(out, "datapackage.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=2)
@@ -171,14 +174,14 @@ def main(db_path, stats_path, out_root, version):
             f.write("\n")
 
     covered = ", ".join(str(y) for y in years if y < 2004) + f", and {min(y for y in years if y >= 2004)}–{max(years)}"
-    readme = README.format(title=TITLE, version=version, today=today, covered=covered, license=LICENSE,
+    readme = README.format(title=TITLE, version=version, today=today, covered=covered, license=LICENSE, repo=REPO, contact=CONTACT,
                            sessions=counts["sessions"], appearances=counts["appearances"], people=counts["people"],
                            institutions=counts["institutions"], author=AUTHOR["name"])
     open(os.path.join(out, "README.md"), "w", encoding="utf-8").write(readme)
     open(os.path.join(out, "CITATION.cff"), "w", encoding="utf-8").write(CITATION.format(
         title=TITLE, version=version, today=today, license=LICENSE, orcid=AUTHOR["orcid"]))
     zen = {"title": f"{TITLE} ({version})", "upload_type": "dataset", "version": version, "publication_date": today,
-           "creators": [AUTHOR], "license": LICENSE, "access_right": "open",
+           "creators": [AUTHOR], "license": "cc-by-4.0", "access_right": "open",
            "keywords": ["CCCC", "Conference on College Composition and Communication", "rhetoric and composition",
                         "writing studies", "conference programs", "two-year colleges"],
            "description": f"<p>Sessions and listed participants from CCCC convention programs ({covered}), parsed from NCTE's program files: {counts['sessions']:,} sessions and {counts['appearances']:,} listed appearances. Names, affiliations and titles are as printed; affiliations are matched to ROR and IPEDS. Counts are of people listed in the program, not attendees. Session descriptions are not included.</p>",
@@ -186,6 +189,7 @@ def main(db_path, stats_path, out_root, version):
            "related_identifiers": [{"identifier": "https://pinakes.wacclearinghouse.org", "relation": "isSupplementTo", "resource_type": "other"}]}
     json.dump(zen, open(os.path.join(out, "zenodo.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=2)
 
+    shutil.copy(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "DATA-LICENSE.txt"), os.path.join(out, "DATA-LICENSE.txt"))
     files = sorted(os.path.relpath(os.path.join(d, n), out).replace("\\", "/") for d, _, ns in os.walk(out) for n in ns)
     with open(os.path.join(out, "SHA256SUMS"), "w", encoding="utf-8", newline="\n") as f:
         for p in files:
@@ -198,7 +202,7 @@ def main(db_path, stats_path, out_root, version):
 
 README = """# {title}
 
-Version {version}, built {today}. Data license: {license}.
+Version {version}, built {today}. Data license: CC BY 4.0 (`DATA-LICENSE.txt`); code license: MIT. Suggested credit: Lewis, Justin. *CCCC Convention Program Corpus.* {repo}
 
 Sessions and listed participants from the programs of the Conference on College Composition and Communication (CCCC), the annual convention of CCCC, which is part of the National Council of Teachers of English (NCTE). This release covers {covered}: {sessions:,} sessions, {appearances:,} listed appearances, {people:,} name clusters and {institutions:,} matched institutions.
 
@@ -230,7 +234,7 @@ Sessions and listed participants from the programs of the Conference on College 
 
 ## How it was built
 
-The capture is a private WARC copy of NCTE's program files and eShow pages, made in October 2026. The parsing code (PyMuPDF for the PDFs, BeautifulSoup for eShow and the 1998 pages), the alias lists and the build script are in the project repository. [TO DECIDE: repository link]
+The capture is a private WARC copy of NCTE's program files and eShow pages, made in October 2026. The parsing code (PyMuPDF for the PDFs, BeautifulSoup for eShow and the 1998 pages), the alias lists and the build script are in the project repository: {repo}
 
 ## Citation
 
@@ -238,7 +242,7 @@ The capture is a private WARC copy of NCTE's program files and eShow pages, made
 
 ## Corrections
 
-Anyone listed can ask for a correction, a merge or a split of their name. [TO DECIDE: contact address]
+Anyone listed can ask for a correction, a merge or a split of their name: {contact}
 """
 
 CITATION = """cff-version: 1.2.0

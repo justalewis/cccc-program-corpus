@@ -583,7 +583,7 @@ def export(fmt):
     rows = corpus_rows(request.args, MAX_EXPORT)
     label = corpus_label(request.args)
     if fmt == "json":
-        body = json.dumps({"corpus": {"filters": label, "listings": len(rows), "built": build_date(), "source": SITE_URL,
+        body = json.dumps({"corpus": {"filters": label, "listings": len(rows), "built": build_date(), "source": SITE_URL, "license": "CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)", "credit": "Lewis, Justin. CCCC Convention Program Corpus. " + REPO_URL,
                                       "note": "People listed in the program, not attendees. See /how-to-read."}, "rows": rows}, ensure_ascii=False)
         return Response(body, mimetype="application/json")
     buf = io.StringIO()

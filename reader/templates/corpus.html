@@ -16,6 +16,7 @@
 <p class="small">{{ label }}</p>
 <p><a class="btn" href="/export.csv?{{ qs }}">Download CSV</a> <a class="btn alt" href="/export.json?{{ qs }}">Download JSON</a></p>
 <h3>Cite this corpus</h3><div class="cite">{{ cite }}</div>
+<p class="small">The data is licensed CC BY 4.0: reuse it freely and credit the corpus as above.</p>
 <h3>First rows</h3>
 <div class="tbl"><table><thead><tr><th>Year</th><th>Session</th><th>Role</th><th>Name</th><th>Affiliation as printed</th><th>Paper</th></tr></thead><tbody>
 {% for r in sample %}<tr><td>{{ r.year }}</td><td><a href="/session/{{ r.session_id }}">{{ r.session_title or r.code }}</a></td><td>{{ r.role_group }}</td><td>{{ r.name_as_printed }}</td><td>{{ r.affiliation_as_printed or '' }}</td><td>{{ r.paper_title or '' }}</td></tr>{% endfor %}
