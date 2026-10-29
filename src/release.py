@@ -1,13 +1,13 @@
 """Assemble a release package of the corpus for deposit (Zenodo). Writes files only; uploads nothing.
 
-Usage: python -I src/release.py <db_path> <stats.json> <out_root> <version>
+Usage: python -I src/release.py <db_path> <stats.json> <out_root> <version> [doi]
 Writes <out_root>/cccc-program-corpus-<version>/ with:
   data/*.csv                 the export tables (session descriptions and eShow keys left out)
   cccc-program-corpus.sqlite the same tables as one SQLite file
   datapackage.json           Frictionless Data Package: every table and column described
   DATA-DICTIONARY.md         the same descriptions as a readable page
   README.md, CITATION.cff, zenodo.json (deposit metadata draft), SHA256SUMS
-and a zip of that folder beside it. Fields still marked [TO DECIDE] (ORCID, the NCTE statement, the DOI) need Justin before deposit.
+and a zip of that folder beside it. The optional fifth argument is the DOI, reserved on Zenodo, which goes into the README and CITATION.cff.
 """
 import csv, hashlib, json, os, shutil, sqlite3, sys, zipfile
 from datetime import date
@@ -15,7 +15,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # python -I leav
 from export import TABLES
 
 TITLE = "CCCC Convention Program Corpus"
-AUTHOR = {"name": "Lewis, Justin", "affiliation": "Olympic College", "orcid": "[TO DECIDE: ORCID]"}
+AUTHOR = {"name": "Lewis, Justin", "affiliation": "Olympic College", "orcid": "0000-0003-2144-7971"}
 LICENSE = "CC-BY-4.0"
 LICENSE_URL = "https://creativecommons.org/licenses/by/4.0/"
 REPO = "https://github.com/justalewis/cccc-program-corpus"
@@ -131,7 +131,7 @@ def sha(path):
             h.update(b)
     return h.hexdigest()
 
-def main(db_path, stats_path, out_root, version):
+def main(db_path, stats_path, out_root, version, doi=None):
     out = os.path.join(out_root, f"cccc-program-corpus-{version}")
     shutil.rmtree(out, ignore_errors=True)
     os.makedirs(os.path.join(out, "data"))
@@ -174,19 +174,19 @@ def main(db_path, stats_path, out_root, version):
             f.write("\n")
 
     covered = ", ".join(str(y) for y in years if y < 2004) + f", and {min(y for y in years if y >= 2004)}–{max(years)}"
-    readme = README.format(title=TITLE, version=version, today=today, covered=covered, license=LICENSE, repo=REPO, contact=CONTACT,
+    readme = README.format(title=TITLE, version=version, today=today, covered=covered, license=LICENSE, repo=REPO, contact=CONTACT, doi_line=(f"https://doi.org/{doi}" if doi else "DOI to be added."),
                            sessions=counts["sessions"], appearances=counts["appearances"], people=counts["people"],
                            institutions=counts["institutions"], author=AUTHOR["name"])
     open(os.path.join(out, "README.md"), "w", encoding="utf-8").write(readme)
     open(os.path.join(out, "CITATION.cff"), "w", encoding="utf-8").write(CITATION.format(
-        title=TITLE, version=version, today=today, license=LICENSE, orcid=AUTHOR["orcid"]))
+        title=TITLE, version=version, today=today, license=LICENSE, orcid=AUTHOR["orcid"]) + (f'doi: "{doi}"' + chr(10) if doi else ""))
     zen = {"title": f"{TITLE} ({version})", "upload_type": "dataset", "version": version, "publication_date": today,
            "creators": [AUTHOR], "license": "cc-by-4.0", "access_right": "open",
            "keywords": ["CCCC", "Conference on College Composition and Communication", "rhetoric and composition",
                         "writing studies", "conference programs", "two-year colleges"],
            "description": f"<p>Sessions and listed participants from CCCC convention programs ({covered}), parsed from NCTE's program files: {counts['sessions']:,} sessions and {counts['appearances']:,} listed appearances. Names, affiliations and titles are as printed; affiliations are matched to ROR and IPEDS. Counts are of people listed in the program, not attendees. Session descriptions are not included.</p>",
-           "notes": "[TO DECIDE: NCTE notice or permission statement]",
-           "related_identifiers": [{"identifier": "https://pinakes.wacclearinghouse.org", "relation": "isSupplementTo", "resource_type": "other"}]}
+           "notes": "The programs are NCTE's. This dataset holds facts printed in them and software-made matches and groupings, and it leaves out NCTE's session descriptions. NCTE has not reviewed or endorsed it.",
+           "related_identifiers": [{"identifier": REPO, "relation": "isSupplementedBy", "resource_type": "software"}]}
     json.dump(zen, open(os.path.join(out, "zenodo.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=2)
 
     shutil.copy(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "DATA-LICENSE.txt"), os.path.join(out, "DATA-LICENSE.txt"))
@@ -238,7 +238,7 @@ The capture is a private WARC copy of NCTE's program files and eShow pages, made
 
 ## Citation
 
-{author}. *{title}*, version {version}. [TO DECIDE: Zenodo DOI]
+{author}. *{title}*, version {version}. {doi_line}
 
 ## Corrections
 
@@ -260,4 +260,4 @@ authors:
 """
 
 if __name__ == "__main__":
-    main(*sys.argv[1:5])
+    main(*sys.argv[1:6])
