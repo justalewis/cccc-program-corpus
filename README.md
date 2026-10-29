@@ -111,6 +111,10 @@ Public view: https://cccc-program-corpus.fly.dev (Datasette over the release dat
 
 All five open straight from the file in an ordinary browser.
 
+## Code archive
+
+The code (the reader, the build pipeline, the review pages and the tests) is archived on Zenodo through GitHub releases, separately from the data. Each release is a snapshot of this repository; `.zenodo.json` holds its metadata and `THIRD-PARTY-NOTICES.md` lists what was not written here.
+
 ## License
 
 Code: MIT (`LICENSE`). Data: Creative Commons Attribution 4.0 International, CC BY 4.0 (`DATA-LICENSE.txt`). Credit: Lewis, Justin. *CCCC Convention Program Corpus*, version 0.1.0. https://doi.org/10.5281/zenodo.23751615 (Zenodo, published 29 October 2026). The programs belong to NCTE; the data holds facts printed in them (names, affiliations, titles, session codes) and our matching and groupings, and leaves out NCTE's session descriptions. Corrections: justalewis1@gmail.com.

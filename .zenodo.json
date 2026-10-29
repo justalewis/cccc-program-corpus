@@ -1,0 +1,23 @@
+{
+  "title": "CCCC Program Reader: code for the CCCC Convention Program Corpus",
+  "upload_type": "software",
+  "description": "<p>Code, documentation and build scripts for the CCCC Convention Program Corpus (dataset: https://doi.org/10.5281/zenodo.23751615). It includes the parsers for NCTE's program PDFs, the eShow listings and the Wayback Machine copies of the 1998 and 1999 programs; the matching of names and affiliations to ROR and IPEDS; the review pages; the Datasette configuration; and the CCCC Program Reader, a Flask application (https://cccc-program-reader.fly.dev) with census, area, group, network, atlas and term tools.</p><p>The tests check the ethics rules the reader promises: who gets a person page, the thresholds on network views, and that no private field reaches the database or the exports. The code is MIT licensed. The data has its own DOI and is licensed CC BY 4.0. This archive contains no NCTE program files and no session descriptions.</p>",
+  "creators": [
+    {"name": "Lewis, Justin", "affiliation": "Olympic College", "orcid": "0000-0003-2144-7971"}
+  ],
+  "license": "MIT",
+  "access_right": "open",
+  "keywords": [
+    "Conference on College Composition and Communication",
+    "CCCC",
+    "rhetoric and composition",
+    "writing studies",
+    "conference programs",
+    "disciplinography",
+    "Flask",
+    "Datasette"
+  ],
+  "related_identifiers": [
+    {"identifier": "10.5281/zenodo.23751615", "relation": "isSupplementTo", "scheme": "doi", "resource_type": "dataset"}
+  ]
+}
