@@ -256,7 +256,7 @@ authors:
   - family-names: "Lewis"
     given-names: "Justin"
     affiliation: "Olympic College"
-    orcid: "{orcid}"
+    orcid: "https://orcid.org/{orcid}"
 """
 
 if __name__ == "__main__":

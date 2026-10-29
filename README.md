@@ -1,5 +1,7 @@
 # CCCC Program Corpus
 
+Cite the data: Lewis, Justin. *CCCC Convention Program Corpus*, version 0.1.0. Zenodo, 2026. https://doi.org/10.5281/zenodo.23751615
+
 Open, linked data from the CCCC convention programs, 1949–2027: sessions, the people listed in them, and their institutions (with ROR, IPEDS and Carnegie class, so two-year college participation can be counted).
 
 Build plan and year-by-year inventory: https://claude.ai/artifact/ATiTrR28yzNNj3BWZe4BuQ
@@ -111,7 +113,7 @@ All five open straight from the file in an ordinary browser.
 
 ## License
 
-Code: MIT (`LICENSE`). Data: Creative Commons Attribution 4.0 International, CC BY 4.0 (`DATA-LICENSE.txt`). Credit: Lewis, Justin. *CCCC Convention Program Corpus.* https://github.com/justalewis/cccc-program-corpus. The programs belong to NCTE; the data holds facts printed in them (names, affiliations, titles, session codes) and our matching and groupings, and leaves out NCTE's session descriptions. Corrections: justalewis1@gmail.com.
+Code: MIT (`LICENSE`). Data: Creative Commons Attribution 4.0 International, CC BY 4.0 (`DATA-LICENSE.txt`). Credit: Lewis, Justin. *CCCC Convention Program Corpus*, version 0.1.0. https://doi.org/10.5281/zenodo.23751615 (Zenodo, published 29 October 2026). The programs belong to NCTE; the data holds facts printed in them (names, affiliations, titles, session codes) and our matching and groupings, and leaves out NCTE's session descriptions. Corrections: justalewis1@gmail.com.
 
 ## Tests
 

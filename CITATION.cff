@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use the data, please cite the Zenodo record below."
+title: "CCCC Convention Program Corpus"
+type: dataset
+version: "0.1.0"
+doi: "10.5281/zenodo.23751615"
+date-released: "2026-10-29"
+license: CC-BY-4.0
+repository-code: "https://github.com/justalewis/cccc-program-corpus"
+url: "https://cccc-program-reader.fly.dev"
+abstract: "Sessions and listed participants from the programs of the Conference on College Composition and Communication, 1998, 1999 and 2004 to 2027, with affiliations matched to ROR and IPEDS."
+authors:
+  - family-names: "Lewis"
+    given-names: "Justin"
+    affiliation: "Olympic College"
+    orcid: "https://orcid.org/0000-0003-2144-7971"
