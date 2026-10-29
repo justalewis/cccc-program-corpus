@@ -1,7 +1,7 @@
 """Build a review page for the name clusters that build_persons.py could not settle.
 
 Usage: python -I src/review_people.py <db_path> <out.html> ["data/person_decisions*.csv"]
-Lists every 'exact-name;review' cluster, largest first, as a year-by-year timeline of
+Lists every cluster still marked review ('exact-name;review', or 'near-name-reviewed;review' where a merge created the overlap), largest first, as a year-by-year timeline of
 institution, session and paper title. For each, choose "Same person", "Different people"
 or "Not sure", then "Download decisions" writes person_decisions.csv in the form
 build_persons.py reads: save it in data/ (any name starting person_decisions) and
@@ -16,7 +16,7 @@ def main(db_path, out_path, decisions_csv="data/person_decisions*.csv"):
     for path in glob.glob(decisions_csv):
         done |= {r["person_id"] for r in csv.DictReader(open(path, encoding="utf-8-sig"))}
     people = con.execute("""SELECT p.id, p.display_name, count(*) n FROM person p JOIN appearance a ON a.person_id = p.id
-                            WHERE p.method = 'exact-name;review' GROUP BY p.id ORDER BY n DESC, p.display_name""").fetchall()
+                            WHERE p.method LIKE '%;review' GROUP BY p.id ORDER BY n DESC, p.display_name""").fetchall()
     clusters = []
     for pid, name, n in people:
         if pid in done:
