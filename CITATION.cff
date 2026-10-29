@@ -6,6 +6,10 @@ version: "0.1.0"
 doi: "10.5281/zenodo.23751615"
 date-released: "2026-10-29"
 license: CC-BY-4.0
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.23753772"
+    description: "Archive of the code (all versions). Version 0.1.1 is 10.5281/zenodo.23753773."
 repository-code: "https://github.com/justalewis/cccc-program-corpus"
 url: "https://cccc-program-reader.fly.dev"
 abstract: "Sessions and listed participants from the programs of the Conference on College Composition and Communication, 1998, 1999 and 2004 to 2027, with affiliations matched to ROR and IPEDS."

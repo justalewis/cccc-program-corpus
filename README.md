@@ -113,7 +113,7 @@ All five open straight from the file in an ordinary browser.
 
 ## Code archive
 
-The code (the reader, the build pipeline, the review pages and the tests) is archived on Zenodo through GitHub releases, separately from the data. Each release is a snapshot of this repository; `.zenodo.json` holds its metadata and `THIRD-PARTY-NOTICES.md` lists what was not written here.
+The code (the reader, the build pipeline, the review pages and the tests) is archived on Zenodo through GitHub releases, separately from the data. Cite the code: Lewis, Justin. *CCCC Program Reader: code for the CCCC Convention Program Corpus*, version 0.1.1. Zenodo, 2026. https://doi.org/10.5281/zenodo.23753772 (this DOI covers all versions; version 0.1.1 is https://doi.org/10.5281/zenodo.23753773). Each release is a snapshot of this repository; `.zenodo.json` holds its metadata and `THIRD-PARTY-NOTICES.md` lists what was not written here.
 
 ## License
 
